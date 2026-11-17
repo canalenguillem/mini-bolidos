@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M3**
+Hito actual: **M4**
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
@@ -35,7 +35,7 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Detección de atasco y reaparición
 - [x] Rubber banding suave
 - [x] Modo carrera rápida jugable de principio a fin
-- [ ] **Humano:** ¿la IA es divertida? ¿demasiado fácil o difícil?
+- [x] **Humano:** ¿la IA es divertida? ¿demasiado fácil o difícil?
 
 ## M4 — Temas: Oeste y Jungla
 - [ ] TileSets con custom data `surface`
