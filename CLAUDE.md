@@ -23,7 +23,7 @@ Juego de carreras arcade con **vista cenital**, inspirado en *Micro Machines V3*
 godot --headless --path . --import                 # reimportar assets
 godot --headless --path . -s res://tools/load_all.gd   # cargar/instanciar todos los recursos
 godot --headless --path . -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit
-godot --path . res://scenes/tracks/test_track.tscn # ejecutar una escena (necesita pantalla)
+godot --path . res://scenes/race/race.tscn # ejecutar una escena (necesita pantalla)
 ```
 
 ## Estructura

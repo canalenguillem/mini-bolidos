@@ -6,7 +6,7 @@ const EXTENSIONS: Array[String] = [".gd", ".tscn", ".tres"]
 const SKIP_DIRS: Array[String] = ["res://addons", "res://.godot"]
 
 
-func _init() -> void:
+func _initialize() -> void:
 	var failed: int = 0
 	var paths: Array[String] = _collect("res://")
 	for path: String in paths:

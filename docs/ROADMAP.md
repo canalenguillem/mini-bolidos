@@ -22,12 +22,12 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] **Humano:** probar la sensación de conducción y ajustar `@export`
 
 ## M2 — Reglas de carrera
-- [ ] `track.gd` común: checkpoints generados desde `RacingLine`, `StartGrid`, `get_surface_at`
-- [ ] `LapTracker` (+ tests) y cálculo de posiciones (+ tests)
-- [ ] `RaceManager`: cuenta atrás → carrera → fin
-- [ ] HUD: vuelta X/3, posición, tiempo, barra de nitro
-- [ ] Reaparición (atasco, fuera del mapa, tecla R)
-- [ ] Pantalla de resultados
+- [x] `track.gd` común: checkpoints generados desde `RacingLine`, `StartGrid`, `get_surface_at`
+- [x] `LapTracker` (+ tests) y cálculo de posiciones (+ tests)
+- [x] `RaceManager`: cuenta atrás → carrera → fin
+- [x] HUD: vuelta X/3, posición, tiempo, barra de nitro
+- [x] Reaparición (atasco, fuera del mapa, tecla R)
+- [x] Pantalla de resultados
 
 ## M3 — Rivales IA
 - [ ] `AIController` según la skill `ia-rival`

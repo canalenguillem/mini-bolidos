@@ -3,6 +3,7 @@ extends CharacterBody2D
 ## Coche arcade cenital. Mira hacia +X. No sabe quién lo conduce: usa su Controller.
 
 signal crashed(impact: float)
+signal reset_requested  ## el piloto pide reaparecer (tecla R)
 
 @export var data: CarData
 @export_group("Tuning")
@@ -16,6 +17,7 @@ var stats: CarStats
 var track: Track  ## lo asigna la pista o RaceManager
 var rubber_band: float = 1.0  ## solo coches IA (0.92…1.08)
 var nitro_charges: int = 0
+var locked: bool = false  ## bloqueado (cuenta atrás, fin de carrera): ignora el input
 var current_surface: SurfaceData
 var controller: CarController
 var _nitro_time_left: float = 0.0
@@ -41,10 +43,24 @@ func is_boosting() -> bool:
 	return _nitro_time_left > 0.0
 
 
+## Fracción de nitro activo restante (1 al activarlo, 0 al acabar).
+func nitro_fraction() -> float:
+	return _nitro_time_left / stats.nitro_duration if stats != null and stats.nitro_duration > 0.0 else 0.0
+
+
+## Coloca el coche y lo deja parado (reaparición).
+func teleport(xform: Transform2D) -> void:
+	global_transform = xform
+	velocity = Vector2.ZERO
+	_nitro_time_left = 0.0
+
+
 func _physics_process(delta: float) -> void:
 	if stats == null:
 		return
-	var input: DriveInput = controller.get_input(delta)
+	var input: DriveInput = DriveInput.new() if locked else controller.get_input(delta)
+	if input.reset:
+		reset_requested.emit()
 	var surface: SurfaceData = track.get_surface_at(global_position) if track else _default_surface
 	current_surface = surface
 
