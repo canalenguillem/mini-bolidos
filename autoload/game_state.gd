@@ -14,10 +14,18 @@ var unlocked_tracks: Array[String] = []
 var best_times: Dictionary = {}  ## track_id → segundos
 var current_track: TrackData  ## pista elegida para la próxima carrera
 var last_prize: int = 0  ## premio de la última carrera (para la pantalla de resultados)
+var last_record: bool = false  ## la última carrera batió el mejor tiempo de la pista
+var last_championship_prize: int = 0  ## premio final si la última carrera cerró un campeonato
+var current_championship: Championship  ## campeonato en curso (null en carrera rápida; no se guarda)
+var master_volume: float = 1.0:  ## 0..1; se aplica al bus Master
+	set(value):
+		master_volume = clampf(value, 0.0, 1.0)
+		_apply_volume()
 
 var cars: Dictionary = {}  ## id → CarData
 var upgrade_defs: Dictionary = {}  ## id → UpgradeDef
 var tracks: Dictionary = {}  ## id → TrackData
+var championships: Dictionary = {}  ## id → ChampionshipData
 
 
 func _ready() -> void:
@@ -30,6 +38,7 @@ func load_catalog() -> void:
 	cars = Catalog.cars()
 	upgrade_defs = Catalog.upgrades()
 	tracks = Catalog.tracks()
+	championships = Catalog.championships()
 
 
 ## Partida nueva: sin dinero, con el coche inicial y las pistas gratuitas.
@@ -40,6 +49,10 @@ func reset() -> void:
 	upgrades = {}
 	best_times = {}
 	last_prize = 0
+	last_record = false
+	last_championship_prize = 0
+	current_championship = null
+	master_volume = 1.0
 	unlocked_tracks = []
 	for id: String in tracks:
 		if (tracks[id] as TrackData).unlock_cost <= 0:
@@ -134,16 +147,39 @@ func unlock_track(id: String) -> bool:
 	return true
 
 
+# --- Opciones ---
+
+func _apply_volume() -> void:
+	AudioServer.set_bus_volume_db(0, linear_to_db(maxf(master_volume, 0.0001)))
+	AudioServer.set_bus_mute(0, master_volume <= 0.0)
+
+
+# --- Campeonato ---
+
+## Empieza un campeonato nuevo y deja lista su primera pista.
+func start_championship(data: ChampionshipData) -> void:
+	current_championship = Championship.new(data)
+	current_track = current_championship.current_track()
+
+
+## Carrera rápida: sin campeonato en curso.
+func start_quick_race(track: TrackData) -> void:
+	current_championship = null
+	current_track = track
+
+
 # --- Carreras ---
 
 ## Aplica el resultado del jugador: premio en monedas y mejor tiempo. Devuelve el premio.
 func apply_race_result(track: TrackData, position: int, time: float) -> int:
 	var prize: int = Economy.prize(position, track.reward_mult) if track != null else 0
 	last_prize = prize
+	last_record = false
 	if prize > 0:
 		add_money(prize)
 	if track != null and time > 0.0 and (not best_times.has(track.id) or time < float(best_times[track.id])):
 		best_times[track.id] = time
+		last_record = true
 	changed.emit()
 	return prize
 
@@ -152,7 +188,21 @@ func _on_race_finished(results: Array) -> void:
 	for r: Dictionary in results:
 		if bool(r.get("is_player", false)):
 			apply_race_result(current_track, int(r["position"]), float(r["time"]))
+			_update_championship(results)
 			return
+
+
+func _update_championship(results: Array) -> void:
+	last_championship_prize = 0
+	if current_championship == null:
+		return
+	current_championship.record_race(results)
+	if current_championship.is_finished():
+		last_championship_prize = Economy.championship_prize(
+				current_championship.player_position(), current_championship.data.reward_mult)
+		if last_championship_prize > 0:
+			add_money(last_championship_prize)
+		changed.emit()
 
 
 # --- Guardado ---
@@ -165,6 +215,7 @@ func to_dict() -> Dictionary:
 		"upgrades": upgrades,
 		"unlocked_tracks": unlocked_tracks,
 		"best_times": best_times,
+		"master_volume": master_volume,
 	}
 
 
@@ -200,6 +251,10 @@ func from_dict(data: Dictionary) -> void:
 		for id: Variant in raw_tracks:
 			if id is String and tracks.has(id) and not unlocked_tracks.has(id):
 				unlocked_tracks.append(id)
+
+	var volume: Variant = data.get("master_volume")
+	if volume is float or volume is int:
+		master_volume = float(volume)
 
 	var raw_times: Variant = data.get("best_times")
 	if raw_times is Dictionary:

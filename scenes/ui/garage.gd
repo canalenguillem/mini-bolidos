@@ -4,6 +4,7 @@ extends Control
 ## Solo presenta y llama a GameState; la lógica de economía vive allí.
 
 const RACE_SCENE: String = "res://scenes/race/race.tscn"
+const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const FONT_SIZE: int = 20
 ## Estadísticas que se muestran como barras: [título, propiedad de CarStats]
 const STATS: Array = [["Velocidad", "max_speed"], ["Aceleración", "acceleration"], ["Agarre", "grip"], ["Nitro", "nitro_charges"]]
@@ -12,6 +13,7 @@ var _view_id: String = ""  ## coche que se está mirando (no tiene por qué ser 
 var _track_id: String = ""
 var _ref: Dictionary = {}  ## propiedad → valor de referencia (el máximo posible entre todos los coches)
 
+@onready var _back: Button = $Margin/Root/Header/Back
 @onready var _money: Label = $Margin/Root/Header/Money
 @onready var _car_list: VBoxContainer = $Margin/Root/Body/CarsPanel/CarList
 @onready var _preview: Control = $Margin/Root/Body/MidPanel/Preview
@@ -32,6 +34,7 @@ func _ready() -> void:
 	_track_id = GameState.current_track.id if GameState.current_track != null else ""
 	_compute_reference()
 	_preview.resized.connect(_center_preview)
+	_back.pressed.connect(func() -> void: get_tree().change_scene_to_file(MAIN_MENU_SCENE))
 	_car_action.pressed.connect(_on_car_action)
 	_track_option.item_selected.connect(_on_track_selected)
 	_race_button.pressed.connect(_on_race_pressed)
@@ -221,5 +224,5 @@ func _on_track_selected(index: int) -> void:
 
 
 func _on_race_pressed() -> void:
-	GameState.current_track = GameState.tracks[_track_id]
+	GameState.start_quick_race(GameState.tracks[_track_id])
 	get_tree().change_scene_to_packed(load(RACE_SCENE))

@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M7** (parcial; M6 saltado por decisión del humano, M5 pendiente de validar jugando)
+Hito actual: **M7** (parcial: arte, audio y Android pendientes; M5 y M6 pendientes de validar jugando)
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
@@ -51,9 +51,9 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Desbloqueo de pistas
 
 ## M6 — Menús y campeonato
-- [ ] Menú principal, selección de pista, pausa, opciones (volumen)
-- [ ] Modo campeonato (4 pistas, puntos y premio final)
-- [ ] Mejores tiempos por pista
+- [x] Menú principal, selección de pista, pausa, opciones (volumen)
+- [x] Modo campeonato (4 pistas, puntos y premio final)
+- [x] Mejores tiempos por pista
 
 ## M7 — Pulido y Android
 - [ ] Arte final (pack CC0) — pendiente: el humano descarga el pack a `assets/`

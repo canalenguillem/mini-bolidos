@@ -99,7 +99,11 @@ Race (Node)                      scenes/race/race.gd = RaceManager
 
 ## Flujo de escenas
 
-`main_menu → track_select | garage → race → results → (garage | track_select)`
+`main_menu → track_select | garage | campeonato → race → results → (garage | track_select | siguiente carrera | main_menu)`
+
+- Pausa: `PauseMenu` (hijo de `Race`, `process_mode = ALWAYS`) con la acción `pause`; desde ahí se abren las opciones (volumen) o se abandona la carrera.
+- Campeonato: `Championship` (`scripts/championship.gd`, lógica pura) lleva puntos 10/6/3/1 y clasificación; `ChampionshipData` (`data/championships/*.tres`) lista sus pistas. `GameState.current_championship` no se guarda en disco: abandonar o cerrar el juego lo pierde. Los premios por carrera se cobran como siempre y al final se suma el premio del campeonato (`Economy.CHAMPIONSHIP_PRIZES`).
+- El volumen (`GameState.master_volume`) se guarda en `save.json` y se aplica al bus Master.
 
 Para cambiar de escena se usa `get_tree().change_scene_to_packed()`. La pista elegida se pasa por `GameState.current_track: TrackData`.
 

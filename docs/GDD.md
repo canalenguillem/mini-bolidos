@@ -23,7 +23,7 @@ Elegir carrera → Correr (3 vueltas, 4 coches) → Premio en monedas → Garaje
 | Modo | Hito | Descripción |
 |---|---|---|
 | Carrera rápida | M3 | Cualquier pista desbloqueada, sin premio |
-| Campeonato | M6 | 4 pistas seguidas por tema, puntos 10/6/3/1, premio final |
+| Campeonato | M6 | 4 pistas seguidas (v1: la "Copa Salvaje" con las 2 del Oeste y las 2 de la Jungla, porque hay 2 pistas por tema), puntos 10/6/3/1, premio final 2000/1200/600/200 por puesto. Sus pistas se juegan aunque no estén desbloqueadas |
 | Contrarreloj | Opcional | Solo, con fantasma de la mejor vuelta |
 | Multijugador local | Opcional | 2 jugadores en pantalla compartida (teclado + mando) |
 

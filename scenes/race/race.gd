@@ -51,6 +51,7 @@ var _rubber_left: float = 0.0
 @onready var _camera: FollowCamera = $Camera2D
 @onready var _hud: Hud = $HUD
 @onready var _results: Results = $Results
+@onready var _pause_menu: PauseMenu = $PauseMenu
 
 
 func _ready() -> void:
@@ -182,7 +183,14 @@ func _finish_race() -> void:
 	_hud.set_countdown("")
 	var results: Array = _build_results()
 	Events.race_finished.emit(results)
-	_results.show_results(results, GameState.last_prize)  # GameState aplica el premio al oír race_finished
+	_pause_menu.can_pause = false
+	# GameState aplica premio, récord y campeonato al oír race_finished (por eso se lee después)
+	_results.show_results(results, {
+		"prize": GameState.last_prize,
+		"record": GameState.last_record,
+		"championship": GameState.current_championship,
+		"championship_prize": GameState.last_championship_prize,
+	})
 	state_changed.emit(state)
 
 

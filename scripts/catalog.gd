@@ -11,6 +11,10 @@ static func upgrades() -> Dictionary:
 	return _load_dir("res://data/upgrades", "id")
 
 
+static func championships() -> Dictionary:
+	return _load_dir("res://data/championships", "id")
+
+
 ## Pistas jugables (sin las de tema "test").
 static func tracks() -> Dictionary:
 	var all: Dictionary = _load_dir("res://data/tracks", "id")

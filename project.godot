@@ -5,7 +5,7 @@ config_version=5
 
 config/name="Mini Bólidos"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-run/main_scene="res://scenes/ui/garage.tscn"
+run/main_scene="res://scenes/ui/main_menu.tscn"
 
 [autoload]
 
