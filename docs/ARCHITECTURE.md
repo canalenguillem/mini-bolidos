@@ -14,7 +14,7 @@ Nada más va en autoload. `RaceManager` es un nodo de la escena de carrera, no u
 
 ```
 CarData        id, display_name, price, sprite: Texture2D,
-               base_max_speed, base_acceleration, base_grip, base_steering,
+               base_max_speed, base_acceleration, base_grip, base_steering, base_nitro_charges,
                braking, drag, max_reverse, nitro_boost, nitro_duration
 UpgradeDef     id ("engine" | "turbo" | "tires" | "nitro"), display_name,
                base_cost, cost_growth (1.6), per_level (0.06…), max_level (5)

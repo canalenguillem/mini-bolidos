@@ -13,12 +13,12 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] `./tools/check.sh` en verde
 
 ## M1 — Un coche que se conduce bien
-- [ ] `DriveInput`, `CarController`, `PlayerController`
-- [ ] `CarData`, `CarStats` (+ tests), `SurfaceData`
-- [ ] `car.tscn` con la física de la skill `fisica-coche-arcade` (placeholder con `Polygon2D`)
-- [ ] `test_track.tscn`: un óvalo con paredes y zonas de asfalto, tierra y barro
-- [ ] Camera2D con suavizado y adelanto
-- [ ] Nitro funcionando
+- [x] `DriveInput`, `CarController`, `PlayerController`
+- [x] `CarData`, `CarStats` (+ tests), `SurfaceData`
+- [x] `car.tscn` con la física de la skill `fisica-coche-arcade` (placeholder con `Polygon2D`)
+- [x] `test_track.tscn`: un óvalo con paredes y zonas de asfalto, tierra y barro
+- [x] Camera2D con suavizado y adelanto
+- [x] Nitro funcionando
 - [ ] **Humano:** probar la sensación de conducción y ajustar `@export`
 
 ## M2 — Reglas de carrera
