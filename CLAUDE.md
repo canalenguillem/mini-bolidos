@@ -46,7 +46,7 @@ data/
   rivals/          # *.tres (RivalData: personalidad de cada piloto IA)
 assets/            # sprites, tilesets, audio, fuentes
 tests/             # test_*.gd (GUT)
-tools/             # check.sh, load_all.gd
+tools/             # check.sh, load_all.gd, track_builder.gd, gen_tilesets.gd, gen_<pista>.gd
 ```
 
 ## Convenciones
