@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M5**
+Hito actual: **M7** (parcial; M6 saltado por decisión del humano, M5 pendiente de validar jugando)
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
@@ -56,10 +56,11 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [ ] Mejores tiempos por pista
 
 ## M7 — Pulido y Android
-- [ ] Arte final (pack CC0) y animación de ruedas
-- [ ] Partículas: polvo, barro, salpicaduras, nitro y marcas de derrape
+- [ ] Arte final (pack CC0) — pendiente: el humano descarga el pack a `assets/`
+- [x] Animación de ruedas (placeholder)
+- [x] Partículas: polvo, barro, salpicaduras, nitro y marcas de derrape (placeholder de color por superficie)
 - [ ] Audio: motor con pitch, derrape, choques y música por tema
-- [ ] Sacudida de cámara en choques y zoom con la velocidad
+- [x] Sacudida de cámara en choques y zoom con la velocidad
 - [ ] Controles táctiles y exportación a Android
 
 ## Opcionales

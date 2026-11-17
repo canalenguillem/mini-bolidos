@@ -22,6 +22,7 @@ var nitro_charges: int = 0
 var locked: bool = false  ## bloqueado (cuenta atrás, fin de carrera): ignora el input
 var current_surface: SurfaceData
 var controller: CarController
+var _fx: CarFx
 var _nitro_time_left: float = 0.0
 var _default_surface: SurfaceData = preload("res://data/surfaces/asphalt.tres")
 
@@ -29,6 +30,7 @@ var _default_surface: SurfaceData = preload("res://data/surfaces/asphalt.tres")
 func _ready() -> void:
 	add_to_group("cars")
 	controller = $Controller as CarController
+	_fx = get_node_or_null("Fx") as CarFx
 	controller.owner_car = self
 	current_surface = _default_surface
 	if stats == null and data != null:
@@ -62,6 +64,8 @@ func teleport(xform: Transform2D) -> void:
 	global_transform = xform
 	velocity = Vector2.ZERO
 	_nitro_time_left = 0.0
+	if _fx != null:
+		_fx.reset()
 
 
 func _physics_process(delta: float) -> void:
@@ -114,6 +118,8 @@ func _physics_process(delta: float) -> void:
 	var pre_velocity: Vector2 = velocity
 	move_and_slide()
 	_handle_collisions(pre_velocity)
+	if _fx != null:
+		_fx.update_state(delta, fwd, lat, input.steer, surface, boosting)
 
 
 func _handle_collisions(pre_velocity: Vector2) -> void:
