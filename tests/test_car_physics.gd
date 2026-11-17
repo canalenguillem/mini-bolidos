@@ -21,7 +21,7 @@ func before_each() -> void:
 	_car = (load(CAR_PATH) as PackedScene).instantiate() as Car
 	_car.data = load("res://data/cars/beetle.tres") as CarData
 	add_child_autofree(_car)
-	_ctrl = FakeController.new()
+	_ctrl = autofree(FakeController.new()) as FakeController
 	_car.controller = _ctrl
 	_ctrl.owner_car = _car
 

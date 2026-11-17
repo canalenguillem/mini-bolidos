@@ -48,6 +48,11 @@ func nitro_fraction() -> float:
 	return _nitro_time_left / stats.nitro_duration if stats != null and stats.nitro_duration > 0.0 else 0.0
 
 
+## Color de la carrocería (placeholder visual).
+func set_body_color(color: Color) -> void:
+	($Body as Polygon2D).color = color
+
+
 ## Coloca el coche y lo deja parado (reaparición).
 func teleport(xform: Transform2D) -> void:
 	global_transform = xform

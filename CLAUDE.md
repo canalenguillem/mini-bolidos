@@ -42,6 +42,7 @@ data/
   upgrades/        # *.tres (UpgradeDef)
   tracks/          # *.tres (TrackData)
   surfaces/        # *.tres (SurfaceData)
+  rivals/          # *.tres (RivalData: personalidad de cada piloto IA)
 assets/            # sprites, tilesets, audio, fuentes
 tests/             # test_*.gd (GUT)
 tools/             # check.sh, load_all.gd

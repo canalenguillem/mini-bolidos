@@ -8,9 +8,19 @@ signal state_changed(new_state: State)
 
 const CAR_SCENE: PackedScene = preload("res://scenes/car/car.tscn")
 const GO_TEXT_TIME: float = 0.8  ## s que se muestra "¡YA!"
+const DIFFICULTY_SKILL: Array[float] = [0.9, 1.0, 1.08]
 
 @export var track_data: TrackData
 @export var car_data: CarData
+@export var rivals: Array[RivalData] = []
+@export_enum("Fácil", "Normal", "Difícil") var difficulty: int = 1
+@export var player_slot: int = 3  ## puesto de parrilla del jugador (0 = primero)
+@export_group("Rubber banding")
+@export var rubber_interval: float = 0.5  ## s entre recálculos
+@export var rubber_range_cps: float = 2.0  ## ventaja en checkpoints para el efecto máximo
+@export var rubber_max_delta: float = 0.08  ## ±8 % de velocidad máxima como mucho
+@export var rubber_step: float = 0.02  ## cambio máximo por recálculo (suavizado)
+@export_group("")
 @export var countdown_seconds: float = 3.0
 @export var stuck_seconds: float = 3.0  ## s casi parado antes de reaparecer
 @export var stuck_speed: float = 25.0  ## px/s por debajo de los cuales cuenta como atascado
@@ -23,6 +33,7 @@ class Racer extends RefCounted:
 	var display_name: String = ""
 	var is_player: bool = false
 	var stuck_time: float = 0.0
+	var respawn_count: int = 0
 	var finish_time: float = -1.0
 
 
@@ -34,6 +45,7 @@ var player: Racer
 
 var _countdown_left: float = 0.0
 var _go_text_left: float = 0.0
+var _rubber_left: float = 0.0
 
 @onready var _cars_root: Node2D = $Cars
 @onready var _camera: FollowCamera = $Camera2D
@@ -72,6 +84,10 @@ func _physics_process(delta: float) -> void:
 			for racer: Racer in racers:
 				_check_stuck(racer, delta)
 				_check_bounds(racer)
+			_rubber_left -= delta
+			if _rubber_left <= 0.0:
+				_rubber_left = rubber_interval
+				_update_rubber_band()
 	_update_hud()
 
 
@@ -79,19 +95,41 @@ func _physics_process(delta: float) -> void:
 
 func _spawn_cars() -> void:
 	var slots: Array[Transform2D] = track.start_transforms()
+	var p_slot: int = clampi(player_slot, 0, slots.size() - 1)
+	var rival_i: int = 0
+	for slot_i: int in slots.size():
+		if slot_i == p_slot:
+			player = _add_racer(null, slots[slot_i])
+		elif rival_i < rivals.size():
+			_add_racer(rivals[rival_i], slots[slot_i])
+			rival_i += 1
+
+
+## rival == null → el jugador (PlayerController de la escena del coche); si no, un AIController.
+func _add_racer(rival: RivalData, xform: Transform2D) -> Racer:
 	var racer := Racer.new()
 	racer.car = CAR_SCENE.instantiate() as Car
-	racer.display_name = "Jugador"
-	racer.is_player = true
+	racer.is_player = rival == null
+	racer.display_name = "Jugador" if rival == null else rival.display_name
+	if rival != null:
+		var old: Node = racer.car.get_node("Controller")
+		racer.car.remove_child(old)
+		old.free()
+		var ai := AIController.new()
+		ai.name = "Controller"
+		ai.configure(rival, DIFFICULTY_SKILL[difficulty])
+		racer.car.add_child(ai)
 	racer.tracker = LapTracker.new(track.checkpoint_count, track_data.laps)
 	racer.tracker.lap_completed.connect(_on_lap_completed.bind(racer))
 	_cars_root.add_child(racer.car)
 	racer.car.setup(car_data, {})
 	racer.car.track = track
-	racer.car.teleport(slots[0])
+	racer.car.teleport(xform)
+	if rival != null:
+		racer.car.set_body_color(rival.color)
 	racer.car.reset_requested.connect(_respawn.bind(racer))
 	racers.append(racer)
-	player = racer
+	return racer
 
 
 func _set_locked(locked: bool) -> void:
@@ -168,6 +206,18 @@ func _score(racer: Racer) -> float:
 	return RacePositions.score(racer.tracker.laps, last, fraction, track.checkpoint_count)
 
 
+# --- Rubber banding ---
+
+## Ajusta suavemente la velocidad máxima de las IA según su ventaja sobre el jugador.
+func _update_rubber_band() -> void:
+	var player_score: float = _score(player)
+	for racer: Racer in racers:
+		if racer.is_player:
+			continue
+		var target: float = RubberBand.factor(_score(racer) - player_score, rubber_range_cps, rubber_max_delta)
+		racer.car.rubber_band = move_toward(racer.car.rubber_band, target, rubber_step)
+
+
 # --- Reaparición ---
 
 func _check_stuck(racer: Racer, delta: float) -> void:
@@ -189,6 +239,7 @@ func _respawn(racer: Racer) -> void:
 		return
 	racer.car.teleport(track.get_respawn_transform(racer.tracker.last_checkpoint))
 	racer.stuck_time = 0.0
+	racer.respawn_count += 1
 
 
 # --- HUD ---

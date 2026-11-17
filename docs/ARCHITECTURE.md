@@ -21,6 +21,7 @@ UpgradeDef     id ("engine" | "turbo" | "tires" | "nitro"), display_name,
 TrackData      id, display_name, theme, scene: PackedScene, laps, reward_mult,
                unlock_cost, thumbnail
 SurfaceData    id, grip_mult, speed_mult, drag_mult, particles_color, sound
+RivalData      id, display_name, color, lane_offset, skill, mistakes, nitro_eagerness
 ```
 
 `CarStats` (en `scripts/car_stats.gd`, extiende `RefCounted`) es el **resultado calculado** de combinar `CarData` con los niveles de mejora: `CarStats.build(car_data, levels: Dictionary) -> CarStats`. Es función pura y está cubierta por tests.

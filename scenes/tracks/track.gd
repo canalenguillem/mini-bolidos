@@ -26,7 +26,7 @@ var checkpoint_count: int = 0
 var curve_length: float = 0.0
 
 var _curve: Curve2D
-var _line: Path2D
+var racing_line: Path2D  ## línea de carrera (la usan la IA y el progreso)
 var _cp_offsets: Array[float] = []
 var _start_transforms: Array[Transform2D] = []
 
@@ -35,10 +35,10 @@ var _start_transforms: Array[Transform2D] = []
 
 
 func _ready() -> void:
-	_line = get_node_or_null("RacingLine") as Path2D
-	if _line == null or _line.curve == null:
+	racing_line = get_node_or_null("RacingLine") as Path2D
+	if racing_line == null or racing_line.curve == null:
 		return
-	_curve = _line.curve
+	_curve = racing_line.curve
 	curve_length = _curve.get_baked_length()
 	_generate_checkpoints()
 	_generate_grid()
@@ -74,7 +74,7 @@ func _zone_surface_id(global_pos: Vector2) -> String:
 
 ## Distancia (px) recorrida sobre RacingLine hasta el punto más cercano a global_pos.
 func get_offset(global_pos: Vector2) -> float:
-	return _curve.get_closest_offset(_line.to_local(global_pos))
+	return _curve.get_closest_offset(racing_line.to_local(global_pos))
 
 
 ## Offset normalizado 0..1.
@@ -109,7 +109,7 @@ func _transform_at(offset: float, lateral: float) -> Transform2D:
 	var behind: Vector2 = _curve.sample_baked(fposmod(o - 5.0, curve_length))
 	var tangent: Vector2 = (ahead - behind).normalized()
 	var pos: Vector2 = _curve.sample_baked(o) + tangent.rotated(PI / 2.0) * lateral
-	return _line.global_transform * Transform2D(tangent.angle(), pos)
+	return racing_line.global_transform * Transform2D(tangent.angle(), pos)
 
 
 func _generate_checkpoints() -> void:

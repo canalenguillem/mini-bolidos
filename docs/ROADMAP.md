@@ -30,11 +30,11 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Pantalla de resultados
 
 ## M3 — Rivales IA
-- [ ] `AIController` según la skill `ia-rival`
-- [ ] 3 rivales con personalidades distintas
-- [ ] Detección de atasco y reaparición
-- [ ] Rubber banding suave
-- [ ] Modo carrera rápida jugable de principio a fin
+- [x] `AIController` según la skill `ia-rival`
+- [x] 3 rivales con personalidades distintas
+- [x] Detección de atasco y reaparición
+- [x] Rubber banding suave
+- [x] Modo carrera rápida jugable de principio a fin
 - [ ] **Humano:** ¿la IA es divertida? ¿demasiado fácil o difícil?
 
 ## M4 — Temas: Oeste y Jungla
