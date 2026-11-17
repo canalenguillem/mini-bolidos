@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M1**
+Hito actual: **M2**
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
@@ -19,7 +19,7 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] `test_track.tscn`: un óvalo con paredes y zonas de asfalto, tierra y barro
 - [x] Camera2D con suavizado y adelanto
 - [x] Nitro funcionando
-- [ ] **Humano:** probar la sensación de conducción y ajustar `@export`
+- [x] **Humano:** probar la sensación de conducción y ajustar `@export`
 
 ## M2 — Reglas de carrera
 - [ ] `track.gd` común: checkpoints generados desde `RacingLine`, `StartGrid`, `get_surface_at`
