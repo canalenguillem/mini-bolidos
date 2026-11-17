@@ -9,6 +9,9 @@ func test_superficies_cargan_con_valores_del_gdd() -> void:
 		"asphalt": [1.0, 1.0, 1.0],
 		"dirt": [0.75, 0.95, 1.1],
 		"mud": [0.5, 0.7, 2.0],
+		"sand": [0.6, 0.8, 1.6],
+		"grass": [0.7, 0.85, 1.4],
+		"water": [0.6, 0.6, 2.5],
 	}
 	for id: String in expected:
 		var s: SurfaceData = load("res://data/surfaces/%s.tres" % id) as SurfaceData

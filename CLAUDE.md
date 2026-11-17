@@ -34,7 +34,8 @@ autoload/          # events.gd, game_state.gd, save_system.gd
 scenes/
   car/             # car.tscn, car.gd, controllers/ (player_controller.gd, ai_controller.gd)
   race/            # race.tscn (RaceManager), hud.tscn, results.tscn
-  tracks/          # _template.tscn, test_track.tscn, west_01.tscn, jungle_01.tscn…
+  tracks/          # track.gd, _template.tscn, test_track.tscn, west_01.tscn, jungle_01.tscn…
+  obstacles/       # barrel.tscn, cactus.tscn, log.tscn, train.tscn
   ui/              # main_menu.tscn, garage.tscn, track_select.tscn
 scripts/           # clases sin escena: drive_input.gd, car_stats.gd, lap_tracker.gd…
 data/

@@ -11,6 +11,8 @@ signal reset_requested  ## el piloto pide reaparecer (tecla R)
 @export var drift_grip_factor: float = 0.35  ## fracción del agarre durante el derrape
 @export var wall_speed_keep: float = 0.55  ## fracción de velocidad que se conserva al chocar con una pared
 @export var car_bump_impulse: float = 140.0
+@export var barrel_push: float = 0.9  ## fracción del impacto que se transmite a los cuerpos rígidos (barriles)
+@export var barrel_drag: float = 0.15  ## velocidad que se pierde al empujar uno de frente
 @export var nitro_accel_mult: float = 1.5  ## multiplicador de aceleración con nitro
 
 var stats: CarStats
@@ -118,6 +120,10 @@ func _handle_collisions(pre_velocity: Vector2) -> void:
 			var push: Vector2 = -col.get_normal() * car_bump_impulse
 			(other as Car).velocity += push
 			velocity -= push * 0.5
+		elif other is RigidBody2D:
+			var body := other as RigidBody2D
+			body.apply_central_impulse(-col.get_normal() * impact * body.mass * barrel_push)
+			velocity *= 1.0 - barrel_drag * clampf(impact / maxf(pre_velocity.length(), 1.0), 0.0, 1.0)
 		elif impact > 0.0 and pre_velocity.length() > 0.0:
 			# Pérdida proporcional al ángulo: de frente se conserva wall_speed_keep, rozando casi todo
 			var head_on: float = clampf(impact / pre_velocity.length(), 0.0, 1.0)

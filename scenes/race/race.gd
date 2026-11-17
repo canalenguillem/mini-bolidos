@@ -56,6 +56,9 @@ var _rubber_left: float = 0.0
 func _ready() -> void:
 	if GameState.current_track != null:
 		track_data = GameState.current_track
+	for arg: String in OS.get_cmdline_user_args():  # godot … race.tscn -- --track=west_02
+		if arg.begins_with("--track="):
+			track_data = load("res://data/tracks/%s.tres" % arg.trim_prefix("--track=")) as TrackData
 	track = track_data.scene.instantiate() as Track
 	add_child(track)
 	move_child(track, 0)

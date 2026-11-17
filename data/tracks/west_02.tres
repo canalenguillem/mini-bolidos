@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrackData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/tracks/west_02.tscn" id="1_qbbol"]
+[ext_resource type="Script" path="res://scripts/track_data.gd" id="2_6nmbs"]
+
+[resource]
+script = ExtResource("2_6nmbs")
+id = "west_02"
+display_name = "Paso del Ferrocarril"
+theme = "west"
+scene = ExtResource("1_qbbol")
+reward_mult = 1.2
+unlock_cost = 400

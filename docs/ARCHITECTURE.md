@@ -65,6 +65,10 @@ Track (Node2D)                   scenes/tracks/track.gd (script común a todas)
 - `get_respawn_transform(checkpoint_index: int) -> Transform2D`
 - `start_transforms() -> Array[Transform2D]`
 
+### Cómo se generan las pistas
+
+Las pistas de tema (`west_01`, `west_02`, `jungle_01`, `jungle_02`) no se editan a mano: `tools/gen_<id>.gd` describe la línea central y los obstáculos, y `tools/track_builder.gd` genera `scenes/tracks/<id>.tscn` y `data/tracks/<id>.tres`. Para retocar una pista: edita su `gen_<id>.gd`, ejecuta `godot --headless --path . -s res://tools/gen_<id>.gd` y después `./tools/check.sh`. Los TileSets (`assets/tilesets/*.tres`) salen de `tools/gen_tilesets.gd` (colores planos; se sustituirán por arte en M7).
+
 ## La carrera
 
 ```

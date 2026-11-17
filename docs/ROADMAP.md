@@ -38,10 +38,10 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] **Humano:** ¿la IA es divertida? ¿demasiado fácil o difícil?
 
 ## M4 — Temas: Oeste y Jungla
-- [ ] TileSets con custom data `surface`
-- [ ] `west_01`, `west_02`, `jungle_01`, `jungle_02` (skill `crear-pista`)
-- [ ] Obstáculos: barriles (RigidBody2D), tren que cruza, troncos, vados
-- [ ] `TrackData` para cada pista
+- [x] TileSets con custom data `surface`
+- [x] `west_01`, `west_02`, `jungle_01`, `jungle_02` (skill `crear-pista`)
+- [x] Obstáculos: barriles (RigidBody2D), tren que cruza, troncos, vados
+- [x] `TrackData` para cada pista
 
 ## M5 — Garaje y progresión
 - [ ] `UpgradeDef` × 4, `CarData` × 3

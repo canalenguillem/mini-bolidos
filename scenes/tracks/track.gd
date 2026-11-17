@@ -8,6 +8,9 @@ const SURFACES: Dictionary = {
 	"asphalt": preload("res://data/surfaces/asphalt.tres"),
 	"dirt": preload("res://data/surfaces/dirt.tres"),
 	"mud": preload("res://data/surfaces/mud.tres"),
+	"sand": preload("res://data/surfaces/sand.tres"),
+	"grass": preload("res://data/surfaces/grass.tres"),
+	"water": preload("res://data/surfaces/water.tres"),
 }
 const DEFAULT_SURFACE: String = "asphalt"
 const GRID_SLOTS: int = 4

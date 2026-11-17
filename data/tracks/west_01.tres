@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TrackData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/tracks/west_01.tscn" id="1_mju4d"]
+[ext_resource type="Script" path="res://scripts/track_data.gd" id="2_s027g"]
+
+[resource]
+script = ExtResource("2_s027g")
+id = "west_01"
+display_name = "Cañón del Coyote"
+theme = "west"
+scene = ExtResource("1_mju4d")

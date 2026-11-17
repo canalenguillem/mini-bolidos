@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrackData" format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/tracks/jungle_02.tscn" id="1_gamrc"]
+[ext_resource type="Script" path="res://scripts/track_data.gd" id="2_7t3ql"]
+
+[resource]
+script = ExtResource("2_7t3ql")
+id = "jungle_02"
+display_name = "Puente de Lianas"
+theme = "jungle"
+scene = ExtResource("1_gamrc")
+reward_mult = 1.6
+unlock_cost = 1200
