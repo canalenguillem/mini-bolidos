@@ -44,11 +44,11 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] `TrackData` para cada pista
 
 ## M5 — Garaje y progresión
-- [ ] `UpgradeDef` × 4, `CarData` × 3
-- [ ] `GameState` + `SaveSystem` (+ tests)
-- [ ] Escena de garaje: elegir coche, comprar coche, comprar mejoras y ver stats con barras
-- [ ] Premios de carrera → dinero
-- [ ] Desbloqueo de pistas
+- [x] `UpgradeDef` × 4, `CarData` × 3
+- [x] `GameState` + `SaveSystem` (+ tests)
+- [x] Escena de garaje: elegir coche, comprar coche, comprar mejoras y ver stats con barras
+- [x] Premios de carrera → dinero
+- [x] Desbloqueo de pistas
 
 ## M6 — Menús y campeonato
 - [ ] Menú principal, selección de pista, pausa, opciones (volumen)

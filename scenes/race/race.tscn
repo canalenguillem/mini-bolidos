@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://scenes/race/race.gd" id="1"]
-[ext_resource type="Resource" path="res://data/tracks/test_track.tres" id="2"]
+[ext_resource type="Resource" path="res://data/tracks/west_01.tres" id="2"]
 [ext_resource type="Resource" path="res://data/cars/beetle.tres" id="3"]
 [ext_resource type="Script" path="res://scenes/race/follow_camera.gd" id="4"]
 [ext_resource type="PackedScene" path="res://scenes/race/hud.tscn" id="5"]

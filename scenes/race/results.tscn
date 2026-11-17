@@ -17,9 +17,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -250.0
-offset_top = -170.0
+offset_top = -200.0
 offset_right = 250.0
-offset_bottom = 170.0
+offset_bottom = 200.0
 
 [node name="Box" type="VBoxContainer" parent="Panel"]
 theme_override_constants/separation = 20
@@ -35,6 +35,19 @@ theme_override_font_sizes/font_size = 28
 text = "1º  Jugador  0:00.00"
 horizontal_alignment = 1
 
-[node name="Retry" type="Button" parent="Panel/Box"]
+[node name="Prize" type="Label" parent="Panel/Box"]
+theme_override_font_sizes/font_size = 28
+text = "Sin premio"
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Panel/Box"]
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Retry" type="Button" parent="Panel/Box/Buttons"]
 theme_override_font_sizes/font_size = 26
 text = "Reintentar"
+
+[node name="Garage" type="Button" parent="Panel/Box/Buttons"]
+theme_override_font_sizes/font_size = 26
+text = "Garaje"

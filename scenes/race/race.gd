@@ -59,6 +59,7 @@ func _ready() -> void:
 	for arg: String in OS.get_cmdline_user_args():  # godot … race.tscn -- --track=west_02
 		if arg.begins_with("--track="):
 			track_data = load("res://data/tracks/%s.tres" % arg.trim_prefix("--track=")) as TrackData
+	GameState.current_track = track_data  # el premio y el mejor tiempo se aplican a esta pista
 	track = track_data.scene.instantiate() as Track
 	add_child(track)
 	move_child(track, 0)
@@ -125,7 +126,12 @@ func _add_racer(rival: RivalData, xform: Transform2D) -> Racer:
 	racer.tracker = LapTracker.new(track.checkpoint_count, track_data.laps)
 	racer.tracker.lap_completed.connect(_on_lap_completed.bind(racer))
 	_cars_root.add_child(racer.car)
-	racer.car.setup(car_data, {})
+	if rival == null:
+		# El jugador usa su coche seleccionado con sus mejoras; los rivales, el coche base
+		var chosen: CarData = GameState.selected_car_data() if GameState.selected_car_data() != null else car_data
+		racer.car.setup(chosen, GameState.car_levels(chosen.id), GameState.upgrade_defs)
+	else:
+		racer.car.setup(car_data, {})
 	racer.car.track = track
 	racer.car.teleport(xform)
 	if rival != null:
@@ -176,7 +182,7 @@ func _finish_race() -> void:
 	_hud.set_countdown("")
 	var results: Array = _build_results()
 	Events.race_finished.emit(results)
-	_results.show_results(results)
+	_results.show_results(results, GameState.last_prize)  # GameState aplica el premio al oír race_finished
 	state_changed.emit(state)
 
 
@@ -185,7 +191,9 @@ func _build_results() -> Array:
 	var results: Array = []
 	for i: int in positions.size():
 		var racer: Racer = racers[positions[i]]
-		results.append({"name": racer.display_name, "position": i + 1, "time": racer.finish_time})
+		results.append({
+			"name": racer.display_name, "position": i + 1, "time": racer.finish_time, "is_player": racer.is_player,
+		})
 	return results
 
 

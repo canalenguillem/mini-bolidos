@@ -6,7 +6,9 @@
 |---|---|---|
 | `Events` | `autoload/events.gd` | Bus de señales globales: `race_started`, `lap_completed(car, lap)`, `race_finished(results)`, `money_changed(amount)` |
 | `GameState` | `autoload/game_state.gd` | Dinero, coches comprados, niveles de mejora por coche, pistas desbloqueadas y coche seleccionado. Sin lógica de UI |
-| `SaveSystem` | `autoload/save_system.gd` | Serializa `GameState` a `user://save.json` con un campo `version` para poder migrar |
+| `SaveSystem` | `autoload/save_system.gd` | Serializa `GameState` a `user://save.json` con un campo `version` para poder migrar. Guarda al oír `GameState.changed`, escribe a un temporal y renombra, y un archivo corrupto deja la partida por defecto. En las pruebas GUT usa `user://test_save.json` para no tocar la partida real |
+
+Lógica pura de apoyo: `Economy` (coste de mejoras, premios) y `Catalog` (carga de `data/`) en `scripts/`. El garaje (`scenes/ui/garage.gd`) solo presenta y llama a `GameState`. `GameState` aplica el premio al oír `Events.race_finished`.
 
 Nada más va en autoload. `RaceManager` es un nodo de la escena de carrera, no un singleton.
 
@@ -15,6 +17,8 @@ Nada más va en autoload. `RaceManager` es un nodo de la escena de carrera, no u
 ```
 CarData        id, display_name, price, sprite: Texture2D,
                base_max_speed, base_acceleration, base_grip, base_steering, base_nitro_charges,
+               base_offroad (0..1: fracción de la penalización de superficie que se anula),
+               description, color,
                braking, drag, max_reverse, nitro_boost, nitro_duration
 UpgradeDef     id ("engine" | "turbo" | "tires" | "nitro"), display_name,
                base_cost, cost_growth (1.6), per_level (0.06…), max_level (5)

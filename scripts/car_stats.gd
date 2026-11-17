@@ -12,6 +12,7 @@ var max_reverse: float = 0.0
 var nitro_boost: float = 1.0
 var nitro_duration: float = 0.0
 var nitro_charges: int = 0
+var offroad: float = 0.0  ## 0..1: cuánto se anula la penalización de tierra, barro, etc.
 
 
 ## levels: id de mejora → nivel. upgrades: id de mejora → UpgradeDef.
@@ -23,6 +24,7 @@ static func build(car_data: CarData, levels: Dictionary = {}, upgrades: Dictiona
 	s.grip = car_data.base_grip * (1.0 + _bonus("tires", levels, upgrades))
 	s.nitro_charges = car_data.base_nitro_charges + roundi(_bonus("nitro", levels, upgrades))
 	s.steering = car_data.base_steering
+	s.offroad = car_data.base_offroad
 	s.braking = car_data.braking
 	s.drag = car_data.drag
 	s.max_reverse = car_data.max_reverse

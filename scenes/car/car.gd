@@ -39,6 +39,8 @@ func setup(car_data: CarData, levels: Dictionary, upgrades: Dictionary = {}) -> 
 	data = car_data
 	stats = CarStats.build(car_data, levels, upgrades)
 	nitro_charges = stats.nitro_charges
+	if has_node("Body"):
+		set_body_color(car_data.color)
 
 
 func is_boosting() -> bool:
@@ -82,7 +84,10 @@ func _physics_process(delta: float) -> void:
 	_nitro_time_left = maxf(_nitro_time_left - delta, 0.0)
 
 	# --- Longitudinal ---
-	var max_speed: float = stats.max_speed * surface.speed_mult * rubber_band \
+	var speed_mult: float = lerpf(surface.speed_mult, 1.0, stats.offroad)
+	var drag_mult: float = lerpf(surface.drag_mult, 1.0, stats.offroad)
+	var grip_mult: float = lerpf(surface.grip_mult, 1.0, stats.offroad)
+	var max_speed: float = stats.max_speed * speed_mult * rubber_band \
 			* (stats.nitro_boost if boosting else 1.0)
 	var accel: float = stats.acceleration * input.throttle * (nitro_accel_mult if boosting else 1.0)
 	if boosting:
@@ -91,7 +96,7 @@ func _physics_process(delta: float) -> void:
 		# Si va hacia delante frena; si está casi parado, marcha atrás
 		accel -= (stats.braking if fwd > 10.0 else stats.acceleration * 0.5) * input.brake
 	fwd += accel * delta
-	fwd -= fwd * stats.drag * surface.drag_mult * delta
+	fwd -= fwd * stats.drag * drag_mult * delta
 	fwd = clampf(fwd, -stats.max_reverse, max_speed)
 
 	# --- Giro (no se gira parado; la marcha atrás invierte el volante) ---
@@ -100,7 +105,7 @@ func _physics_process(delta: float) -> void:
 
 	# --- Agarre lateral / derrape ---
 	var drifting: bool = input.brake > 0.0 and absf(input.steer) > 0.5 and fwd > turn_speed_ref
-	var grip: float = stats.grip * surface.grip_mult * (drift_grip_factor if drifting else 1.0)
+	var grip: float = stats.grip * grip_mult * (drift_grip_factor if drifting else 1.0)
 	lat = lerpf(lat, 0.0, clampf(grip * delta, 0.0, 1.0))
 
 	# Recompone con la NUEVA orientación (el morro ya ha girado)

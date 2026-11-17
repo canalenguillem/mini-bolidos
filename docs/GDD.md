@@ -43,7 +43,7 @@ Versión 1 con 3 coches. Se compran en el garaje.
 | Coche | Precio | Vel. máx | Aceleración | Agarre | Carácter |
 |---|---|---|---|---|---|
 | Escarabajo | 0 (inicial) | media | media | alto | Fácil y perdona |
-| Buggy | 1500 | baja | alta | medio | Muy bueno en tierra y barro |
+| Buggy | 1500 | baja | alta | medio | Muy bueno en tierra y barro (`base_offroad` 0.6: anula el 60 % de la penalización de superficie) |
 | Deportivo | 4000 | alta | media | bajo | Rápido pero derrapa |
 
 ## Mejoras
