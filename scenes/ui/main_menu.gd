@@ -27,6 +27,7 @@ func _ready() -> void:
 	_options_layer.visible = false
 	_championship.disabled = GameState.championships.is_empty()
 	_money.text = "Monedas: %d" % GameState.money
+	Music.play_menu()
 	_quick.grab_focus()
 
 

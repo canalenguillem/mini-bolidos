@@ -10,7 +10,7 @@ extends RefCounted
 ##  - guarda scenes/tracks/<id>.tscn y data/tracks/<id>.tres e imprime el mapa ASCII.
 ##
 ## Claves de la definición (ver tools/gen_west_01.gd):
-##   id, display_name, theme, laps, reward_mult, unlock_cost
+##   id, display_name, theme, laps, reward_mult, unlock_cost, music (ruta opcional del .ogg)
 ##   points: Array[Vector2]            línea central, en unidades
 ##   half_width, shoulder: float       semiancho de calzada y ancho de arcén, en unidades
 ##   road_surface, shoulder_surface    superficies por defecto (id de SurfaceData)
@@ -346,6 +346,9 @@ func _save_track_data(scene_path: String) -> void:
 	td.laps = int(def.get("laps", 3))
 	td.reward_mult = float(def.get("reward_mult", 1.0))
 	td.unlock_cost = int(def.get("unlock_cost", 0))
+	var music_path: String = str(def.get("music", ""))
+	if not music_path.is_empty() and ResourceLoader.exists(music_path):
+		td.music = load(music_path) as AudioStream
 	td.scene = ResourceLoader.load(scene_path, "", ResourceLoader.CACHE_MODE_REPLACE) as PackedScene
 	ResourceSaver.save(td, "res://data/tracks/%s.tres" % def["id"])
 

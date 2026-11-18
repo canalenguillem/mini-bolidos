@@ -32,6 +32,7 @@ var _ref: Dictionary = {}  ## propiedad → valor de referencia (el máximo posi
 
 
 func _ready() -> void:
+	Music.play_menu()
 	_view_id = GameState.selected_car
 	_track_id = GameState.current_track.id if GameState.current_track != null else ""
 	_compute_reference()

@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scenes/car/car.gd" id="1"]
 [ext_resource type="Script" path="res://scenes/car/controllers/player_controller.gd" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/car/car_fx.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/car/car_audio.tscn" id="4"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_car"]
 size = Vector2(32, 16)
@@ -14,6 +15,8 @@ motion_mode = 1
 script = ExtResource("1")
 
 [node name="Fx" parent="." instance=ExtResource("3")]
+
+[node name="Audio" parent="." instance=ExtResource("4")]
 
 [node name="Sprite" type="Sprite2D" parent="."]
 visible = false

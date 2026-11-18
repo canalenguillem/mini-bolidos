@@ -12,7 +12,7 @@ func _initialize() -> void:
 	]
 	var def: Dictionary = {
 		"id": "jungle_01", "display_name": "Río Perdido", "theme": "jungle",
-		"laps": 3, "reward_mult": 1.4, "unlock_cost": 800,
+		"music": "res://assets/audio/music/jungle.ogg", "laps": 3, "reward_mult": 1.4, "unlock_cost": 800,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
 		"road_surface": "grass", "shoulder_surface": "mud",
 		"segments": [

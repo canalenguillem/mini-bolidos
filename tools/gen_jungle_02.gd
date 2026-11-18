@@ -11,7 +11,7 @@ func _initialize() -> void:
 	]
 	var def: Dictionary = {
 		"id": "jungle_02", "display_name": "Puente de Lianas", "theme": "jungle",
-		"laps": 3, "reward_mult": 1.6, "unlock_cost": 1200,
+		"music": "res://assets/audio/music/jungle.ogg", "laps": 3, "reward_mult": 1.6, "unlock_cost": 1200,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
 		"road_surface": "grass", "shoulder_surface": "mud",
 		"segments": [

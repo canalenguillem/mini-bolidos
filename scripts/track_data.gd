@@ -10,3 +10,4 @@ extends Resource
 @export var reward_mult: float = 1.0
 @export var unlock_cost: int = 0
 @export var thumbnail: Texture2D
+@export var music: AudioStream  ## música de la carrera en esta pista

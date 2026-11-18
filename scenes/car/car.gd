@@ -23,6 +23,7 @@ var locked: bool = false  ## bloqueado (cuenta atrás, fin de carrera): ignora e
 var current_surface: SurfaceData
 var controller: CarController
 var _fx: CarFx
+var _audio: CarAudio
 var _nitro_time_left: float = 0.0
 var _default_surface: SurfaceData = preload("res://data/surfaces/asphalt.tres")
 
@@ -31,6 +32,7 @@ func _ready() -> void:
 	add_to_group("cars")
 	controller = $Controller as CarController
 	_fx = get_node_or_null("Fx") as CarFx
+	_audio = get_node_or_null("Audio") as CarAudio
 	controller.owner_car = self
 	current_surface = _default_surface
 	if stats == null and data != null:
@@ -130,6 +132,8 @@ func _physics_process(delta: float) -> void:
 	_handle_collisions(pre_velocity)
 	if _fx != null:
 		_fx.update_state(delta, fwd, lat, input.steer, surface, boosting)
+	if _audio != null:
+		_audio.update_state(delta, fwd, lat, boosting, max_speed)
 
 
 func _handle_collisions(pre_velocity: Vector2) -> void:
@@ -149,4 +153,6 @@ func _handle_collisions(pre_velocity: Vector2) -> void:
 			# Pérdida proporcional al ángulo: de frente se conserva wall_speed_keep, rozando casi todo
 			var head_on: float = clampf(impact / pre_velocity.length(), 0.0, 1.0)
 			velocity *= lerpf(1.0, wall_speed_keep, head_on)
+		if _audio != null:
+			_audio.on_crash(impact)
 		crashed.emit(impact)

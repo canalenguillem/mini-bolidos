@@ -11,6 +11,7 @@ const MAIN_MENU: String = "res://scenes/ui/main_menu.tscn"
 
 
 func _ready() -> void:
+	Music.play_menu()
 	_back.pressed.connect(func() -> void: get_tree().change_scene_to_file(MAIN_MENU))
 	_money.text = "Monedas: %d" % GameState.money
 	var first: Button = null

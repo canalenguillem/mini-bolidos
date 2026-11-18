@@ -11,7 +11,7 @@ func _initialize() -> void:
 	]
 	var def: Dictionary = {
 		"id": "west_02", "display_name": "Paso del Ferrocarril", "theme": "west",
-		"laps": 3, "reward_mult": 1.2, "unlock_cost": 400,
+		"music": "res://assets/audio/music/west.ogg", "laps": 3, "reward_mult": 1.2, "unlock_cost": 400,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
 		"road_surface": "dirt", "shoulder_surface": "sand",
 		"segments": [

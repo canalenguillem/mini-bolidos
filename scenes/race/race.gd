@@ -46,12 +46,14 @@ var player: Racer
 var _countdown_left: float = 0.0
 var _go_text_left: float = 0.0
 var _rubber_left: float = 0.0
+var _last_count: int = 0
 
 @onready var _cars_root: Node2D = $Cars
 @onready var _camera: FollowCamera = $Camera2D
 @onready var _hud: Hud = $HUD
 @onready var _results: Results = $Results
 @onready var _pause_menu: PauseMenu = $PauseMenu
+@onready var _sounds: RaceSounds = $Sounds
 
 
 func _ready() -> void:
@@ -66,6 +68,7 @@ func _ready() -> void:
 	move_child(track, 0)
 	track.checkpoint_passed.connect(_on_checkpoint_passed)
 	_spawn_cars()
+	Music.play(track_data.music)
 	_camera.target = player.car
 	_countdown_left = countdown_seconds
 	_set_locked(true)
@@ -79,7 +82,11 @@ func _physics_process(delta: float) -> void:
 			if _countdown_left <= 0.0:
 				_begin_race()
 			else:
-				_hud.set_countdown(str(ceili(_countdown_left)))
+				var count: int = ceili(_countdown_left)
+				if count != _last_count:
+					_last_count = count
+					_sounds.beep()
+				_hud.set_countdown(str(count))
 		State.RACING:
 			race_time += delta
 			if _go_text_left > 0.0:
@@ -157,6 +164,7 @@ func _begin_race() -> void:
 	_set_locked(false)
 	_go_text_left = GO_TEXT_TIME
 	_hud.set_countdown("¡YA!")
+	_sounds.go()
 	Events.race_started.emit()
 	state_changed.emit(state)
 
@@ -187,6 +195,7 @@ func _finish_race() -> void:
 	var results: Array = _build_results()
 	Events.race_finished.emit(results)
 	_pause_menu.can_pause = false
+	_sounds.finish()
 	# GameState aplica premio, récord y campeonato al oír race_finished (por eso se lee después)
 	_results.show_results(results, {
 		"prize": GameState.last_prize,

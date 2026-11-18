@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/race/hud.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/race/results.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/race/pause_menu.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/race/race_sounds.tscn" id="12"]
 [ext_resource type="Script" path="res://scripts/rival_data.gd" id="7"]
 [ext_resource type="Resource" path="res://data/rivals/rayo.tres" id="8"]
 [ext_resource type="Resource" path="res://data/rivals/bruto.tres" id="9"]
@@ -28,3 +29,5 @@ script = ExtResource("4")
 [node name="Results" parent="." instance=ExtResource("6")]
 
 [node name="PauseMenu" parent="." instance=ExtResource("11")]
+
+[node name="Sounds" parent="." instance=ExtResource("12")]
