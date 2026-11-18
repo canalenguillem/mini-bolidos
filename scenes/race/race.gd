@@ -36,6 +36,10 @@ class Racer extends RefCounted:
 	var stuck_time: float = 0.0
 	var respawn_count: int = 0
 	var finish_time: float = -1.0
+	var slot: int = -1  ## puesto de parrilla (online)
+	var user_id: int = -1
+	var remote: bool = false  ## lo simula otro cliente
+	var bot: bool = false
 
 
 var state: State = State.COUNTDOWN

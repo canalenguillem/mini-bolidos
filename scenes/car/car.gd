@@ -22,8 +22,14 @@ var nitro_charges: int = 0
 var locked: bool = false  ## bloqueado (cuenta atrás, fin de carrera): ignora el input
 var current_surface: SurfaceData
 var controller: CarController
+var ghost: bool = false  ## coche remoto (online): sin física, sigue la posición que llega por red
 var _fx: CarFx
 var _audio: CarAudio
+var _net_pos: Vector2
+var _net_rot: float = 0.0
+var _net_vel: Vector2 = Vector2.ZERO
+var _net_ready: bool = false
+var _name_tag: Label
 var _nitro_time_left: float = 0.0
 var _default_surface: SurfaceData = preload("res://data/surfaces/asphalt.tres")
 
@@ -47,6 +53,67 @@ func setup(car_data: CarData, levels: Dictionary, upgrades: Dictionary = {}) -> 
 		set_sprite(car_data.sprite)
 	elif has_node("Body"):
 		set_body_color(car_data.color)
+
+
+## Convierte el coche en un fantasma online: no choca ni simula; lo mueve net_update().
+func make_ghost() -> void:
+	ghost = true
+	collision_layer = 0
+	collision_mask = 0
+
+
+## Coche online que sí simula (el tuyo o un bot que gobierna el anfitrión): no choca con otros coches.
+func make_online_local() -> void:
+	collision_layer = 0
+	collision_mask = 9  # paredes (1) y obstáculos (4)
+
+
+## Última posición conocida de un coche remoto (llega ~15 veces por segundo).
+func net_update(pos: Vector2, rot: float, vel: Vector2) -> void:
+	_net_pos = pos
+	_net_rot = rot
+	_net_vel = vel
+	if not _net_ready:
+		_net_ready = true
+		global_position = pos
+		rotation = rot
+
+
+## Texto flotante con el nombre del piloto.
+func set_name_tag(text: String) -> void:
+	if _name_tag == null:
+		_name_tag = Label.new()
+		_name_tag.top_level = true
+		_name_tag.z_index = 20
+		_name_tag.add_theme_font_size_override("font_size", 13)
+		_name_tag.add_theme_color_override("font_outline_color", Color.BLACK)
+		_name_tag.add_theme_constant_override("outline_size", 4)
+		add_child(_name_tag)
+	_name_tag.text = text
+	_name_tag.reset_size()
+
+
+func _process(_delta: float) -> void:
+	if _name_tag != null:
+		_name_tag.global_position = global_position + Vector2(-_name_tag.size.x / 2.0, -34.0)
+
+
+func _ghost_step(delta: float) -> void:
+	if not _net_ready:
+		return  # aún no ha llegado ninguna posición: se queda en su puesto de la parrilla
+	_net_pos += _net_vel * delta  # entre dos paquetes sigue avanzando con su velocidad
+	var k: float = 1.0 - exp(-12.0 * delta)
+	global_position = global_position.lerp(_net_pos, k)
+	rotation = lerp_angle(rotation, _net_rot, k)
+	velocity = _net_vel
+	var fwd: float = velocity.dot(transform.x)
+	var lat: float = velocity.dot(transform.y)
+	var surface: SurfaceData = track.get_surface_at(global_position) if track else _default_surface
+	current_surface = surface
+	if _fx != null:
+		_fx.update_state(delta, fwd, lat, 0.0, surface, false)
+	if _audio != null and stats != null:
+		_audio.update_state(delta, fwd, lat, false, stats.max_speed)
 
 
 func is_boosting() -> bool:
@@ -82,6 +149,9 @@ func teleport(xform: Transform2D) -> void:
 
 func _physics_process(delta: float) -> void:
 	if stats == null:
+		return
+	if ghost:
+		_ghost_step(delta)
 		return
 	var input: DriveInput = DriveInput.new() if locked else controller.get_input(delta)
 	if input.reset:

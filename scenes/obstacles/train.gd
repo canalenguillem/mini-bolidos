@@ -41,6 +41,11 @@ func _physics_process(delta: float) -> void:
 	_warning.visible = warning_on and int(_time * 6.0) % 2 == 0  # parpadea
 
 
+## Reinicia el ciclo: online se llama en la salida para que todos los clientes vean los trenes a la vez.
+func reset_time() -> void:
+	_time = phase
+
+
 ## Segundos hasta el próximo cruce (0 si está cruzando). Para tests e IA.
 func time_to_cross() -> float:
 	var cross_start: float = period - 2.0 * half_span / speed

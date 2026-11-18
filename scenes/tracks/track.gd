@@ -13,7 +13,7 @@ const SURFACES: Dictionary = {
 	"water": preload("res://data/surfaces/water.tres"),
 }
 const DEFAULT_SURFACE: String = "asphalt"
-const GRID_SLOTS: int = 4
+const GRID_SLOTS: int = 5  ## 4 en carrera contra IA; 5 en carreras online
 const CHECKPOINT_THICKNESS: float = 24.0
 const LAYER_CHECKPOINTS: int = 4  ## capa 3
 const MASK_CARS: int = 2  ## capa 2

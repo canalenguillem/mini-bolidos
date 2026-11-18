@@ -40,7 +40,7 @@ func test_checkpoints_y_parrilla() -> void:
 	for id: String in TRACK_IDS:
 		var track: Track = _instance(id)
 		assert_gte(track.checkpoint_count, 8, "%s: checkpoints" % id)
-		assert_eq(track.start_transforms().size(), 4, "%s: parrilla" % id)
+		assert_eq(track.start_transforms().size(), 5, "%s: parrilla" % id)
 		for xf: Transform2D in track.start_transforms():
 			assert_not_null(track.get_surface_at(xf.origin), id)
 

@@ -77,7 +77,15 @@ Con 5 jugadores humanos la sala arranca sola, sin bots. Errores (`reason`): `alr
 
 Los resultados se guardan en MariaDB (`races`, `race_results`) y una telemetría de 4 muestras por segundo en MongoDB (`race_telemetry`). Al borrar una cuenta, sus resultados se conservan con el nombre `(cuenta borrada)`.
 
-### Para el cliente de Godot (M10)
+### Cliente de Godot
+
+- `scripts/online_client.gd` (`OnlineClient`) habla con el servidor: cuenta por HTTP y salas/carreras por WebSocket, con señales para cada mensaje. El autoload `Online` es una instancia, para que la sesión y la conexión sobrevivan a los cambios de escena. Guarda solo el servidor y el último usuario en `user://online.json`; **nunca la contraseña**. El servidor por defecto es `https://bolidos.enguillem.es`; se cambia en la pantalla de login o con `-- --server=URL`.
+- Escenas: `online_login` (entrar/registrarse), `online_lobby` (salas y sala de espera) y `online_race` (`OnlineRace`, que hereda de `RaceManager`).
+- En `OnlineRace` cada cliente simula su coche y los demás son fantasmas (`Car.make_ghost()`) que se interpolan y extrapolan con su velocidad. **No hay choques entre coches online** (cada cliente simularía una colisión distinta); sí con paredes y obstáculos. Barriles y troncos no se sincronizan (cada cliente ve los suyos); los trenes arrancan a la vez en la salida.
+- Todos conducen el coche base sin mejoras para que sea justo en el aula (`OnlineRace.use_garage_car` lo cambia). No hay monedas ni premios online.
+- Verificación sin pantalla: `tools/online_smoke.gd` corre una carrera completa de 1 a 5 jugadores contra un servidor real (crea las cuentas con el admin y las borra). `tools/online_demo.gd` graba capturas del flujo. Los tests de GUT usan un WebSocket y un HTTP falsos (`tests/fake_online.gd`).
+
+### Notas para quien toque las pistas
 
 - La parrilla de las pistas tiene hoy 4 puestos (`Track.GRID_SLOTS`); online hacen falta 5.
 - `docs/online_tracks.json` (generado con `tools/export_online_tracks.gd`) tiene `checkpoints` y `length_px` de cada pista. El servidor lleva una copia en `backend/app/game/tracks.json`: **hay que copiarla cada vez que cambie una pista o su número de checkpoints**.

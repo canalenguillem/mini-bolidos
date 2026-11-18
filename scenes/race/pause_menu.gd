@@ -5,6 +5,9 @@ extends CanvasLayer
 const MAIN_MENU: String = "res://scenes/ui/main_menu.tscn"
 
 var can_pause: bool = true  ## la carrera lo desactiva al terminar
+var pauses_game: bool = true  ## online no: los demás siguen corriendo
+var quit_scene: String = MAIN_MENU
+var on_quit: Callable = Callable()  ## se llama antes de abandonar (online: salir de la sala)
 
 @onready var _menu: VBoxContainer = $Center/Menu
 @onready var _resume: Button = $Center/Menu/Resume
@@ -39,7 +42,8 @@ func open() -> void:
 	visible = true
 	_menu.visible = true
 	_options_panel.visible = false
-	get_tree().paused = true
+	if pauses_game:
+		get_tree().paused = true
 	_resume.grab_focus()
 
 
@@ -63,4 +67,6 @@ func _on_options_closed() -> void:
 func _on_quit_pressed() -> void:
 	get_tree().paused = false
 	GameState.current_championship = null  # abandonar la carrera abandona el campeonato
-	get_tree().change_scene_to_file(MAIN_MENU)
+	if on_quit.is_valid():
+		on_quit.call()
+	get_tree().change_scene_to_file(quit_scene)

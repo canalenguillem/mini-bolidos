@@ -73,6 +73,12 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Siguiente"
 
+[node name="Lobby" type="Button" parent="Panel/Box/Buttons"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Volver a las salas"
+
 [node name="Garage" type="Button" parent="Panel/Box/Buttons"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24

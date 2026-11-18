@@ -30,13 +30,13 @@ godot --path . res://scenes/race/race.tscn # ejecutar una escena (necesita panta
 
 ```
 project.godot
-autoload/          # events.gd, game_state.gd, save_system.gd
+autoload/          # events.gd, game_state.gd, save_system.gd, music.gd, online.gd
 scenes/
   car/             # car.tscn, car.gd, controllers/ (player_controller.gd, ai_controller.gd)
   race/            # race.tscn (RaceManager), hud.tscn, results.tscn
   tracks/          # track.gd, _template.tscn, test_track.tscn, west_01.tscn, jungle_01.tscn…
   obstacles/       # barrel.tscn, cactus.tscn, log.tscn, train.tscn
-  ui/              # main_menu.tscn, garage.tscn, track_select.tscn
+  ui/              # main_menu.tscn, garage.tscn, track_select.tscn, online_login.tscn, online_lobby.tscn
 scripts/           # clases sin escena: drive_input.gd, car_stats.gd, lap_tracker.gd…
 data/
   cars/            # *.tres (CarData)

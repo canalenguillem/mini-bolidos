@@ -5,6 +5,7 @@ extends CanvasLayer
 const RACE_SCENE: String = "res://scenes/race/race.tscn"
 const GARAGE_SCENE: String = "res://scenes/ui/garage.tscn"
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
+const LOBBY_SCENE: String = "res://scenes/ui/online_lobby.tscn"
 
 var _championship: Championship
 
@@ -14,6 +15,7 @@ var _championship: Championship
 @onready var _prize: Label = $Panel/Box/Prize
 @onready var _retry: Button = $Panel/Box/Buttons/Retry
 @onready var _next: Button = $Panel/Box/Buttons/Next
+@onready var _lobby: Button = $Panel/Box/Buttons/Lobby
 @onready var _garage: Button = $Panel/Box/Buttons/Garage
 @onready var _menu: Button = $Panel/Box/Buttons/Menu
 
@@ -22,12 +24,13 @@ func _ready() -> void:
 	visible = false
 	_retry.pressed.connect(func() -> void: get_tree().reload_current_scene())
 	_next.pressed.connect(_on_next_pressed)
+	_lobby.pressed.connect(func() -> void: get_tree().change_scene_to_file(LOBBY_SCENE))
 	_garage.pressed.connect(func() -> void: get_tree().change_scene_to_file(GARAGE_SCENE))
 	_menu.pressed.connect(func() -> void: get_tree().change_scene_to_file(MAIN_MENU_SCENE))
 
 
 ## results: [{name, position, time (-1 si no terminó), is_player}], ya ordenado.
-## info: prize (int), record (bool), championship (Championship o null), championship_prize (int).
+## info: prize (int), record (bool), championship (Championship o null), championship_prize (int), online (bool).
 func show_results(results: Array, info: Dictionary = {}) -> void:
 	_championship = info.get("championship") as Championship
 	var prize: int = int(info.get("prize", 0))
@@ -59,9 +62,16 @@ func show_results(results: Array, info: Dictionary = {}) -> void:
 			_standings.text = "Clasificación (%d/%d)\n%s" % [_championship.race_index, _championship.race_count(), "\n".join(lines2)]
 			_next.visible = true
 			_next.text = "Siguiente: %s" % _championship.current_track().display_name
+	var online: bool = bool(info.get("online", false))
+	if online:
+		prize_text = "Carrera online"
+		_retry.visible = false
+		_next.visible = false
+	_lobby.visible = online
+	_garage.visible = not online
 	_prize.text = prize_text
 	visible = true
-	(_next if _next.visible else _menu).grab_focus()
+	(_lobby if _lobby.visible else (_next if _next.visible else _menu)).grab_focus()
 
 
 func _on_next_pressed() -> void:

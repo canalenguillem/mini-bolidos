@@ -79,9 +79,9 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Tests con 5 clientes simulados
 
 ## M10 — Cliente online en Godot
-- [ ] Menú: "Jugar solo" (como ahora) u "Online" (login/registro contra el servidor)
-- [ ] Lista de salas, entrar en cola, cuenta atrás sincronizada
-- [ ] Coches remotos con interpolación, posiciones y resultados compartidos
+- [x] Menú: "Jugar solo" (como ahora) u "Online" (login/registro contra el servidor)
+- [x] Lista de salas, entrar en cola, cuenta atrás sincronizada
+- [x] Coches remotos con interpolación, posiciones y resultados compartidos
 - [ ] **Humano:** carrera real con 5 jugadores
 
 ## M11 — Operación

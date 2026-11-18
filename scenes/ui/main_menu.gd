@@ -4,11 +4,14 @@ extends Control
 
 const TRACK_SELECT: String = "res://scenes/ui/track_select.tscn"
 const GARAGE: String = "res://scenes/ui/garage.tscn"
+const ONLINE_LOGIN: String = "res://scenes/ui/online_login.tscn"
+const ONLINE_LOBBY: String = "res://scenes/ui/online_lobby.tscn"
 const RACE: String = "res://scenes/race/race.tscn"
 
 @onready var _menu: VBoxContainer = $Center/Menu
 @onready var _quick: Button = $Center/Menu/Quick
 @onready var _championship: Button = $Center/Menu/Championship
+@onready var _online: Button = $Center/Menu/Online
 @onready var _garage: Button = $Center/Menu/Garage
 @onready var _options: Button = $Center/Menu/Options
 @onready var _quit: Button = $Center/Menu/Quit
@@ -20,6 +23,7 @@ const RACE: String = "res://scenes/race/race.tscn"
 func _ready() -> void:
 	_quick.pressed.connect(func() -> void: get_tree().change_scene_to_file(TRACK_SELECT))
 	_championship.pressed.connect(_on_championship_pressed)
+	_online.pressed.connect(func() -> void: get_tree().change_scene_to_file(ONLINE_LOBBY if Online.is_logged_in() else ONLINE_LOGIN))
 	_garage.pressed.connect(func() -> void: get_tree().change_scene_to_file(GARAGE))
 	_options.pressed.connect(_on_options_pressed)
 	_quit.pressed.connect(func() -> void: get_tree().quit())
