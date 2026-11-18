@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M9** (online; M8 validado). M7 queda con solo Android pendiente: se hará después del online
+Hito actual: **M10** (online; M8 y M9 validados). M7 queda con solo Android pendiente: se hará después del online
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
