@@ -77,6 +77,10 @@ tools/             # check.sh, load_all.gd, track_builder.gd, gen_tilesets.gd, g
 4. Lo que solo se puede juzgar jugando (sensación de conducción, dificultad) **no lo des por bueno tú**. Deja al humano una lista corta de qué probar y qué `@export` ajustar.
 5. Haz commits pequeños con mensajes descriptivos.
 
+## Para empezar otro juego
+
+La infraestructura común (cuentas, correo, administración, descargas, copias, privacidad, cliente online, exportación) está documentada y empaquetada en `~/code/juego-online-kit` (skill `juego-online`): `new-game.sh` crea un proyecto nuevo desde la etiqueta `infra-v1`. Si mejoras algo común aquí, fija una versión nueva con `update-reference.sh`.
+
 ## Skills del proyecto
 
 - `godot-verificar`: verificar el proyecto sin pantalla; obligatorio antes de dar algo por terminado.
