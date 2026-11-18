@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M10** (online; M8 y M9 validados). M7 queda con solo Android pendiente: se hará después del online
+Hito actual: **M11** (operación; M8, M9 y M10 validados). M7 queda con solo Android pendiente: se hará después del online
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
@@ -86,8 +86,12 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [ ] **Humano:** carrera real con 5 jugadores
 
 ## M11 — Operación
-- [ ] Dominio `bolidos.enguillem.es`, copias de seguridad, límites de uso y revisión de privacidad (alumnado)
-- [ ] Descarga del cliente desde la web
+- [x] Dominio `bolidos.enguillem.es` y HTTPS (los gestiona el profesor)
+- [x] Copias de seguridad diarias con verificación semanal (`backup.sh`, `verify-backup.sh`, `restore.sh` en el servidor)
+- [x] Límites de uso pensados para un aula (IP compartida), topes de conexiones y mensajes, limpieza de datos que ya no hacen falta
+- [x] Privacidad: política en la web, aceptación registrada y versionada, exportar y borrar mis datos, `docs/PRIVACIDAD.md` en el repo del servidor
+- [x] Descarga del cliente desde la web (Windows y Linux) con contador por versión
+- [ ] **Humano:** revisar `docs/PRIVACIDAD.md` con la dirección del centro, decidir la base legal (menores de 14 años), el correo de contacto (`PRIVACY_CONTACT`) y la copia de seguridad fuera del servidor
 
 ## Opcionales
 - [ ] Pista "Mesa de billar" como homenaje a Micro Machines V3
