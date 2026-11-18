@@ -7,8 +7,9 @@ extends Node2D
 @export var idle_pitch: float = 0.7
 @export var max_pitch: float = 1.8
 @export var pitch_smoothing: float = 8.0
-@export var idle_volume_db: float = -16.0
-@export var max_volume_db: float = -8.0
+@export var idle_volume_db: float = -22.0
+@export var max_volume_db: float = -14.0
+@export var volume_offset_db: float = 0.0  ## se suma al motor (los rivales suenan más bajo)
 @export_group("Derrape")
 @export var skid_lateral_speed: float = 80.0  ## px/s de velocidad lateral a partir de la cual chirría
 @export var skid_min_db: float = -22.0
@@ -36,7 +37,7 @@ func _ready() -> void:
 		if looping.stream is AudioStreamOggVorbis:
 			(looping.stream as AudioStreamOggVorbis).loop = true
 	_engine.pitch_scale = idle_pitch
-	_engine.volume_db = idle_volume_db
+	_engine.volume_db = idle_volume_db + volume_offset_db
 	_engine.play()
 
 
@@ -44,7 +45,7 @@ func _ready() -> void:
 func update_state(delta: float, fwd: float, lat: float, boosting: bool, max_speed: float) -> void:
 	var t: float = clampf(absf(fwd) / maxf(max_speed, 1.0), 0.0, 1.0)
 	_engine.pitch_scale = lerpf(_engine.pitch_scale, lerpf(idle_pitch, max_pitch, t), 1.0 - exp(-pitch_smoothing * delta))
-	_engine.volume_db = lerpf(idle_volume_db, max_volume_db, t)
+	_engine.volume_db = lerpf(idle_volume_db, max_volume_db, t) + volume_offset_db
 
 	skidding = absf(lat) > skid_lateral_speed
 	if skidding:

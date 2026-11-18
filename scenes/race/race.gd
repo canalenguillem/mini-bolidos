@@ -15,6 +15,7 @@ const DIFFICULTY_SKILL: Array[float] = [0.9, 1.0, 1.08]
 @export var rivals: Array[RivalData] = []
 @export_enum("Fácil", "Normal", "Difícil") var difficulty: int = 1
 @export var player_slot: int = 3  ## puesto de parrilla del jugador (0 = primero)
+@export var rival_engine_db: float = -7.0  ## el motor de los rivales suena más bajo que el tuyo
 @export_group("Rubber banding")
 @export var rubber_interval: float = 0.5  ## s entre recálculos
 @export var rubber_range_cps: float = 2.0  ## ventaja en checkpoints para el efecto máximo
@@ -139,6 +140,7 @@ func _add_racer(rival: RivalData, xform: Transform2D) -> Racer:
 		var chosen: CarData = GameState.selected_car_data() if GameState.selected_car_data() != null else car_data
 		racer.car.setup(chosen, GameState.car_levels(chosen.id), GameState.upgrade_defs)
 	else:
+		(racer.car.get_node("Audio") as CarAudio).volume_offset_db = rival_engine_db
 		racer.car.setup(car_data, {})
 	racer.car.track = track
 	racer.car.teleport(xform)
