@@ -9,6 +9,7 @@ Objetivo: que el alumnado juegue carreras entre sí en un servidor propio, con c
 - **Sala:** una carrera arranca cuando hay 5 jugadores en espera.
 - **Servidor:** repo aparte, `mini-bolidos-server` (Python/FastAPI, React + TypeScript con Vite, MariaDB, MongoDB, Redis, todo en Docker). Se desarrolla en local y se despliega con rsync en `75enguiem:/home/guillem/code/mini-bolidos-server`.
 - **Publicación:** la gestiona el profesor (dominio `bolidos.enguillem.es`, HTTPS). El servidor solo expone el puerto del frontend (nginx), que enruta `/api` y `/ws` al backend. Las bases de datos y el backend no publican puertos.
+- **MongoDB 4.4:** la VM de `75enguiem` no expone AVX y MongoDB 5+ no arranca. Se usa `mongo:4.4` (fin de vida, sin puerto publicado y solo en la red privada de Docker). Si se activa el CPU "host" en el hipervisor, basta cambiar `MONGO_IMAGE` en el `.env` del servidor.
 - **Correo:** Gmail por SMTP con contraseña de aplicación en `.env` (nunca en el repo).
 
 ## Qué guarda cada base de datos

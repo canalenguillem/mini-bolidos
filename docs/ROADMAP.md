@@ -64,12 +64,12 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [ ] Controles táctiles y exportación a Android
 
 ## M8 — Servidor base y cuentas (repo aparte: `mini-bolidos-server`, ver `docs/ONLINE.md`)
-- [ ] Docker Compose: FastAPI, MariaDB, MongoDB, Redis y frontend (nginx) en una red privada; solo el frontend publica puerto
-- [ ] Registro con usuario y contraseña, correo de activación (Gmail SMTP por `.env`), login y recuperación de contraseña
-- [ ] Multiusuario con sesiones revocables; admin (`enguillem@gmail.com`) con listado de usuarios, bloqueo y expulsión
-- [ ] Presencia: ver quién está conectado ahora mismo
-- [ ] Frontend React + TypeScript: registro, activación, login, panel admin y usuarios conectados
-- [ ] Tests del backend y despliegue en `75enguiem`
+- [x] Docker Compose: FastAPI, MariaDB, MongoDB, Redis y frontend (nginx) en una red privada; solo el frontend publica puerto
+- [x] Registro con usuario y contraseña, correo de activación (Gmail SMTP por `.env`), login y recuperación de contraseña
+- [x] Multiusuario con sesiones revocables; admin (`enguillem@gmail.com`) con listado de usuarios, bloqueo y expulsión
+- [x] Presencia: ver quién está conectado ahora mismo
+- [x] Frontend React + TypeScript: registro, activación, login, panel admin y usuarios conectados
+- [x] Tests del backend y despliegue en `75enguiem`
 - [ ] **Humano:** registrarse con un correo real, activar la cuenta, entrar como admin y ver usuarios conectados
 
 ## M9 — Salas y carreras online (servidor)
