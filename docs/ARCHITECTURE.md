@@ -10,6 +10,8 @@
 
 Lógica pura de apoyo: `Economy` (coste de mejoras, premios) y `Catalog` (carga de `data/`) en `scripts/`. El garaje (`scenes/ui/garage.gd`) solo presenta y llama a `GameState`. `GameState` aplica el premio al oír `Events.race_finished`.
 
+El autoload `Music` (`autoload/music.gd`) reproduce la música con fundido cruzado y no se reinicia al cambiar de escena; por eso es un autoload. Los efectos van en los buses `SFX` y la música en `Music` (`default_bus_layout.tres`).
+
 Nada más va en autoload. `RaceManager` es un nodo de la escena de carrera, no un singleton.
 
 ## Recursos de datos (`class_name … extends Resource`)

@@ -169,3 +169,25 @@ func test_musica_cambia_con_fundido_cruzado() -> void:
 
 func test_la_musica_va_al_bus_music() -> void:
 	assert_eq(Music._active.bus, &"Music")
+
+
+func test_cada_pista_tiene_su_musica() -> void:
+	for id: String in ["west_01", "west_02", "jungle_01", "jungle_02"]:
+		assert_not_null((load("res://data/tracks/%s.tres" % id) as TrackData).music, id)
+	assert_eq((load("res://data/tracks/west_01.tres") as TrackData).music, (load("res://data/tracks/west_02.tres") as TrackData).music)
+	assert_ne((load("res://data/tracks/west_01.tres") as TrackData).music, (load("res://data/tracks/jungle_01.tres") as TrackData).music)
+
+
+func test_musica_del_menu_existe_y_dura_un_minuto() -> void:
+	var menu: AudioStream = load(Music.MENU_MUSIC_PATH) as AudioStream
+	assert_not_null(menu)
+	assert_between(menu.get_length(), 50.0, 70.0)
+
+
+func test_la_carrera_pone_la_musica_de_su_pista() -> void:
+	var race: RaceManager = (load("res://scenes/race/race.tscn") as PackedScene).instantiate() as RaceManager
+	race.track_data = load("res://data/tracks/jungle_01.tres") as TrackData
+	add_child_autofree(race)
+	assert_eq(Music.current, race.track_data.music)
+	assert_true(Music._active.playing)
+	Music.play(null, 0.0)
