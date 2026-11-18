@@ -73,10 +73,10 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] **Humano:** registrarse con un correo real, activar la cuenta, entrar como admin y ver usuarios conectados
 
 ## M9 — Salas y carreras online (servidor)
-- [ ] WebSocket único por usuario: salas en espera, cola, la carrera arranca al llegar a 5 jugadores
-- [ ] Relevo de estados de los coches (cada cliente simula el suyo) y validación de checkpoints y tiempos de meta
-- [ ] Resultados y estadísticas en MariaDB; telemetría y auditoría en MongoDB
-- [ ] Tests con 5 clientes simulados
+- [x] WebSocket único por usuario: salas en espera, cola, la carrera arranca al llegar a 5 jugadores
+- [x] Relevo de estados de los coches (cada cliente simula el suyo) y validación de checkpoints y tiempos de meta
+- [x] Resultados y estadísticas en MariaDB; telemetría y auditoría en MongoDB
+- [x] Tests con 5 clientes simulados
 
 ## M10 — Cliente online en Godot
 - [ ] Menú: "Jugar solo" (como ahora) u "Online" (login/registro contra el servidor)
