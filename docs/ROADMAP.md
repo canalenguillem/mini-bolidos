@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M7** (solo falta Android; audio pendiente de validar jugando)
+Hito actual: **M7** (arte, efectos, audio y música validados; solo falta Android)
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
