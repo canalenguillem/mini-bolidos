@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M7** (arte, efectos, audio y música validados; solo falta Android)
+Hito actual: **M8** (online). M7 queda con solo Android pendiente: se hará después del online
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
@@ -62,6 +62,31 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Audio: motor con pitch, derrape, choques y música por tema (generado con lamb)
 - [x] Sacudida de cámara en choques y zoom con la velocidad
 - [ ] Controles táctiles y exportación a Android
+
+## M8 — Servidor base y cuentas (repo aparte: `mini-bolidos-server`, ver `docs/ONLINE.md`)
+- [ ] Docker Compose: FastAPI, MariaDB, MongoDB, Redis y frontend (nginx) en una red privada; solo el frontend publica puerto
+- [ ] Registro con usuario y contraseña, correo de activación (Gmail SMTP por `.env`), login y recuperación de contraseña
+- [ ] Multiusuario con sesiones revocables; admin (`enguillem@gmail.com`) con listado de usuarios, bloqueo y expulsión
+- [ ] Presencia: ver quién está conectado ahora mismo
+- [ ] Frontend React + TypeScript: registro, activación, login, panel admin y usuarios conectados
+- [ ] Tests del backend y despliegue en `75enguiem`
+- [ ] **Humano:** registrarse con un correo real, activar la cuenta, entrar como admin y ver usuarios conectados
+
+## M9 — Salas y carreras online (servidor)
+- [ ] WebSocket único por usuario: salas en espera, cola, la carrera arranca al llegar a 5 jugadores
+- [ ] Relevo de estados de los coches (cada cliente simula el suyo) y validación de checkpoints y tiempos de meta
+- [ ] Resultados y estadísticas en MariaDB; telemetría y auditoría en MongoDB
+- [ ] Tests con 5 clientes simulados
+
+## M10 — Cliente online en Godot
+- [ ] Menú: "Jugar solo" (como ahora) u "Online" (login/registro contra el servidor)
+- [ ] Lista de salas, entrar en cola, cuenta atrás sincronizada
+- [ ] Coches remotos con interpolación, posiciones y resultados compartidos
+- [ ] **Humano:** carrera real con 5 jugadores
+
+## M11 — Operación
+- [ ] Dominio `bolidos.enguillem.es`, copias de seguridad, límites de uso y revisión de privacidad (alumnado)
+- [ ] Descarga del cliente desde la web
 
 ## Opcionales
 - [ ] Pista "Mesa de billar" como homenaje a Micro Machines V3
