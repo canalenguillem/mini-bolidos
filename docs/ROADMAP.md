@@ -61,6 +61,7 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Partículas: polvo, barro, salpicaduras, nitro y marcas de derrape (placeholder de color por superficie)
 - [x] Audio: motor con pitch, derrape, choques y música por tema (generado con lamb)
 - [x] Sacudida de cámara en choques y zoom con la velocidad
+- [x] Exportación a Linux (`./tools/export_linux.sh`)
 - [ ] Controles táctiles y exportación a Android
 
 ## M8 — Servidor base y cuentas (repo aparte: `mini-bolidos-server`, ver `docs/ONLINE.md`)
