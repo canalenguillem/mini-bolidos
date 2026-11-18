@@ -33,6 +33,10 @@ Objetivo: que el alumnado juegue carreras entre sí en un servidor propio, con c
 
 Se guardan nombre de usuario, correo y resultados de alumnado, a veces menor de edad. Antes de abrirlo al grupo hay que revisarlo con el centro (consentimiento, plazo de conservación, derecho de borrado). Hay un endpoint para borrar la propia cuenta.
 
+### Cookie de descargas
+
+La página de descargas cuenta cuántas veces se descarga cada versión. Para no contar dos veces al mismo alumno (y, a la vez, contar a cada uno de una clase entera que comparte IP), el navegador recibe una cookie técnica aleatoria (`bolidos_cid`, solo para `/api/download`, `HttpOnly`, 90 días). No identifica a la persona ni se cruza con la cuenta; el servidor solo guarda un hash de ese valor junto a la versión y la fecha. Hay que mencionarla en la información de privacidad que se entregue al centro.
+
 ## Protocolo
 
 Un único WebSocket `/api/ws?client=game` por usuario. Autenticación con la cabecera `Authorization: Bearer <token>` (el navegador usa `?token=`). Mensajes JSON de texto, de hasta 4096 caracteres; todos llevan `"t"` con el tipo. Un mensaje desconocido o con datos inválidos se descarta (a veces con `{"t":"error","reason":…}`).
