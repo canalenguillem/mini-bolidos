@@ -25,6 +25,7 @@ godot --headless --path . -s res://tools/load_all.gd   # cargar/instanciar todos
 godot --headless --path . -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit
 godot --path . res://scenes/race/race.tscn # ejecutar una escena (necesita pantalla)
 ./tools/export_linux.sh                            # ejecutable de Linux + build/mini-bolidos-linux.tar.gz (necesita las plantillas de exportación)
+./tools/export_windows.sh                          # ejecutable de Windows + build/mini-bolidos-windows.zip
 ```
 
 ## Estructura
