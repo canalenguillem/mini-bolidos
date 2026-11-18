@@ -26,6 +26,7 @@ func _show(path: String) -> Node:
 func _run() -> void:
 	await process_frame
 	_online = root.get_node("Online") as OnlineClient
+	_online.use_prefs = false  # que la demo no deje el servidor local ni el usuario "demo1" en las preferencias reales
 	var server: String = "http://localhost:8420"
 	for arg: String in OS.get_cmdline_user_args():
 		if arg.begins_with("--server="):
