@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M8** (online). M7 queda con solo Android pendiente: se hará después del online
+Hito actual: **M9** (online; M8 validado). M7 queda con solo Android pendiente: se hará después del online
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
@@ -70,7 +70,7 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Presencia: ver quién está conectado ahora mismo
 - [x] Frontend React + TypeScript: registro, activación, login, panel admin y usuarios conectados
 - [x] Tests del backend y despliegue en `75enguiem`
-- [ ] **Humano:** registrarse con un correo real, activar la cuenta, entrar como admin y ver usuarios conectados
+- [x] **Humano:** registrarse con un correo real, activar la cuenta, entrar como admin y ver usuarios conectados
 
 ## M9 — Salas y carreras online (servidor)
 - [ ] WebSocket único por usuario: salas en espera, cola, la carrera arranca al llegar a 5 jugadores
