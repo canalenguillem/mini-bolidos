@@ -125,8 +125,9 @@ func test_registro() -> void:
 	s._email.text = "ana@example.com"
 	s._password.text = "Clave-1234"
 	s._password2.text = "Clave-1234"
+	s._privacy.button_pressed = true
 	await s._on_submit()
-	assert_eq(_http.calls[0]["body"], {"username": "ana", "email": "ana@example.com", "password": "Clave-1234"})
+	assert_eq(_http.calls[0]["body"], {"username": "ana", "email": "ana@example.com", "password": "Clave-1234", "accept_privacy": true})
 	assert_string_contains(s._message.text, "correo")
 	assert_false(s._email.visible, "vuelve al modo entrar")
 	assert_eq(_went.size(), 0, "registrarse no inicia sesión")
@@ -135,6 +136,7 @@ func test_registro() -> void:
 func test_registro_con_contrasenas_distintas() -> void:
 	var s: OnlineLogin = _login_screen()
 	s._switch.pressed.emit()
+	s._privacy.button_pressed = true
 	s._password.text = "Clave-1234"
 	s._password2.text = "otra-clave-9"
 	await s._on_submit()
@@ -150,6 +152,7 @@ func test_registro_con_usuario_repetido() -> void:
 	s._email.text = "a@example.com"
 	s._password.text = "Clave-1234"
 	s._password2.text = "Clave-1234"
+	s._privacy.button_pressed = true
 	await s._on_submit()
 	assert_eq(s._message.text, "Ese nombre de usuario ya está en uso.")
 	assert_true(s._email.visible, "sigue en el formulario de registro")
@@ -316,3 +319,30 @@ func test_cerrar_sesion() -> void:
 	await s._on_logout()
 	assert_false(_client.is_logged_in())
 	assert_eq(_went, [LOGIN])
+
+
+func test_registrarse_exige_aceptar_la_politica() -> void:
+	var s: OnlineLogin = _login_screen()
+	s._switch.pressed.emit()
+	assert_true(s._privacy.visible and s._privacy_link.visible)
+	assert_false(s._privacy.button_pressed, "la casilla empieza sin marcar")
+	s._user.text = "ana"
+	s._email.text = "ana@example.com"
+	s._password.text = "Clave-1234"
+	s._password2.text = "Clave-1234"
+	await s._on_submit()
+	assert_string_contains(s._message.text, "política de privacidad")
+	assert_eq(_http.calls.size(), 0, "sin marcarla no se envía nada")
+	s._switch.pressed.emit()
+	assert_false(s._privacy.visible, "en el modo entrar no se muestra")
+
+
+func test_login_sin_aceptar_la_politica_explica_que_hacer() -> void:
+	_http.responses["/auth/login"] = {"status": 200, "data": {"access_token": "t", "user": {"id": 1, "username": "ana", "privacy_accepted": false}}}
+	_http.responses["/auth/logout"] = {"status": 200, "data": {"ok": true}}
+	var s: OnlineLogin = _login_screen()
+	s._user.text = "ana"
+	s._password.text = "x"
+	await s._on_submit()
+	assert_string_contains(s._message.text, "política de privacidad")
+	assert_eq(_went.size(), 0)

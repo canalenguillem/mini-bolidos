@@ -67,21 +67,21 @@ func test_errores_de_red_y_de_validacion() -> void:
 	assert_eq(net["code"], "network")
 	assert_string_contains(net["message"], "No se puede conectar")
 	_http.responses["/auth/register"] = {"status": 422, "data": {"detail": [{"msg": "x"}]}}
-	var val: Dictionary = await _client.register("a", "no", "corta")
+	var val: Dictionary = await _client.register("a", "no", "corta", true)
 	assert_eq(val["code"], "validation")
 
 
 func test_registro() -> void:
 	_http.responses["/auth/register"] = {"status": 201, "data": {"ok": true}}
-	var res: Dictionary = await _client.register(" ana ", "ana@example.com", "Clave-1234")
+	var res: Dictionary = await _client.register(" ana ", "ana@example.com", "Clave-1234", true)
 	assert_true(res["ok"])
-	assert_eq(_http.calls[0]["body"], {"username": "ana", "email": "ana@example.com", "password": "Clave-1234"})
+	assert_eq(_http.calls[0]["body"], {"username": "ana", "email": "ana@example.com", "password": "Clave-1234", "accept_privacy": true})
 	assert_false(_client.is_logged_in(), "registrarse no inicia sesión: falta activar")
 
 
 func test_usuario_duplicado() -> void:
 	_http.responses["/auth/register"] = {"status": 409, "data": {"detail": {"code": "username_taken", "message": "Ese nombre de usuario ya está en uso."}}}
-	var res: Dictionary = await _client.register("ana", "ana@example.com", "Clave-1234")
+	var res: Dictionary = await _client.register("ana", "ana@example.com", "Clave-1234", true)
 	assert_eq(res["code"], "username_taken")
 
 
@@ -212,3 +212,29 @@ func test_reconectar_tras_una_caida() -> void:
 	_client.connect_socket()
 	await wait_physics_frames(2)
 	assert_true(_client.connected)
+
+
+func test_sin_aceptar_la_politica_no_se_entra_al_online() -> void:
+	_http.responses["/auth/login"] = {"status": 200, "data": {"access_token": "tok123", "user": {"id": 7, "username": "ana", "privacy_accepted": false}}}
+	_http.responses["/auth/logout"] = {"status": 200, "data": {"ok": true}}
+	var res: Dictionary = await _client.login("ana", "Clave-1234")
+	assert_false(res["ok"])
+	assert_eq(res["code"], "privacy_pending")
+	assert_string_contains(res["message"], "política de privacidad")
+	assert_false(_client.is_logged_in())
+	assert_null(_client._socket, "no se abre el WebSocket")
+	assert_eq(_http.calls[-1]["url"], "https://ejemplo.test/api/auth/logout", "se revoca la sesión en el servidor")
+
+
+func test_la_politica_aceptada_deja_entrar() -> void:
+	_http.responses["/auth/login"] = {"status": 200, "data": {"access_token": "tok123", "user": {"id": 7, "username": "ana", "privacy_accepted": true}}}
+	assert_true((await _client.login("ana", "x"))["ok"])
+
+
+func test_el_servidor_corta_si_falta_aceptar_la_politica() -> void:
+	await _login()
+	watch_signals(_client)
+	_socket.server_closes(4007)
+	await wait_physics_frames(2)
+	assert_signal_emitted_with_parameters(_client, "kicked", ["privacy_pending"])
+	assert_false(_client.is_logged_in())

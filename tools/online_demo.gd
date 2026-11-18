@@ -37,7 +37,7 @@ func _run() -> void:
 	_admin.server_url = server
 	root.add_child(_admin)
 	await _admin.login(OS.get_environment("BOLIDOS_ADMIN_EMAIL"), OS.get_environment("BOLIDOS_ADMIN_PASSWORD"))
-	await _admin.register(USERNAME, USERNAME + "@example.com", PASSWORD)
+	await _admin.register(USERNAME, USERNAME + "@example.com", PASSWORD, true)
 	var users: Dictionary = await _admin._api(HTTPClient.METHOD_GET, "/admin/users?q=" + USERNAME, {})
 	_uid = int(users["data"]["items"][0]["id"])
 	await _admin._api(HTTPClient.METHOD_POST, "/admin/users/%d/activate" % _uid, {})

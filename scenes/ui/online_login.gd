@@ -14,6 +14,8 @@ var _registering: bool = false
 @onready var _email: LineEdit = $Center/Box/Email
 @onready var _password: LineEdit = $Center/Box/Password
 @onready var _password2: LineEdit = $Center/Box/Password2
+@onready var _privacy: CheckBox = $Center/Box/Privacy
+@onready var _privacy_link: Button = $Center/Box/PrivacyLink
 @onready var _server: LineEdit = $Center/Box/Server
 @onready var _message: Label = $Center/Box/Message
 @onready var _submit: Button = $Center/Box/Submit
@@ -32,6 +34,7 @@ func _ready() -> void:
 	_submit.pressed.connect(_on_submit)
 	_switch.pressed.connect(func() -> void: _set_mode(not _registering))
 	_resend.pressed.connect(_on_resend)
+	_privacy_link.pressed.connect(func() -> void: OS.shell_open(online.web_url("/privacidad")))
 	_forgot.pressed.connect(func() -> void: OS.shell_open(online.web_url("/olvide")))
 	_back.pressed.connect(func() -> void: _go(MAIN_MENU_SCENE))
 	_password.text_submitted.connect(func(_t: String) -> void: _on_submit())
@@ -48,6 +51,8 @@ func _set_mode(registering: bool) -> void:
 	_title.text = "Crear cuenta" if registering else "Entrar al modo online"
 	_email.visible = registering
 	_password2.visible = registering
+	_privacy.visible = registering
+	_privacy_link.visible = registering
 	_forgot.visible = not registering
 	_resend.visible = false
 	_submit.text = "Registrarme" if registering else "Entrar"
@@ -89,7 +94,10 @@ func _do_register() -> void:
 	if _password.text != _password2.text:
 		_say("Las contraseñas no coinciden.", true)
 		return
-	var res: Dictionary = await online.register(_user.text, _email.text, _password.text)
+	if not _privacy.button_pressed:
+		_say("Para crear la cuenta tienes que aceptar la política de privacidad.", true)
+		return
+	var res: Dictionary = await online.register(_user.text, _email.text, _password.text, true)
 	if res["ok"]:
 		_set_mode(false)
 		_say("Cuenta creada. Te hemos enviado un correo: abre el enlace para activarla y luego entra.")

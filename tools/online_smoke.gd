@@ -76,7 +76,7 @@ func _run() -> void:
 		return
 	for i: int in _humans:
 		var name: String = "%s%d" % [USER_PREFIX, i + 1]
-		var reg: Dictionary = await _admin.register(name, name + "@example.com", PASSWORD)
+		var reg: Dictionary = await _admin.register(name, name + "@example.com", PASSWORD, true)
 		if not reg["ok"] and reg["code"] != "username_taken":
 			_check(false, "registrar %s: %s" % [name, reg["message"]])
 		var users: Dictionary = await _admin._api(HTTPClient.METHOD_GET, "/admin/users?q=%s" % name, {})

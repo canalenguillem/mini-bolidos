@@ -23,7 +23,7 @@ signal kicked(reason: String)  ## el servidor cerró la sesión (otra sesión, e
 const DEFAULT_SERVER: String = "https://bolidos.enguillem.es"
 const PREFS_PATH: String = "user://online.json"
 const PING_INTERVAL: float = 15.0
-const KICK_CODES: Array[int] = [4001, 4002, 4003]
+const KICK_CODES: Array[int] = [4001, 4002, 4003, 4007]
 
 var server_url: String = DEFAULT_SERVER
 var username_hint: String = ""  ## último usuario que entró (se recuerda; la contraseña nunca)
@@ -72,6 +72,11 @@ func login(login_name: String, password: String) -> Dictionary:
 	var data: Dictionary = res["data"]
 	token = str(data.get("access_token", ""))
 	user = data.get("user", {})
+	if not bool(user.get("privacy_accepted", true)):
+		# La política se acepta en la web: aquí no se puede jugar online hasta entonces
+		await logout()
+		return {"ok": false, "status": 403, "code": "privacy_pending", "data": {},
+				"message": "Primero tienes que aceptar la política de privacidad: entra en %s con tu usuario y acéptala. Luego vuelve aquí." % server_url}
 	username_hint = str(user.get("username", login_name))
 	_save_prefs()
 	logged_in.emit()
@@ -79,8 +84,9 @@ func login(login_name: String, password: String) -> Dictionary:
 	return res
 
 
-func register(username: String, email: String, password: String) -> Dictionary:
-	return await _api(HTTPClient.METHOD_POST, "/auth/register", {"username": username.strip_edges(), "email": email.strip_edges(), "password": password})
+func register(username: String, email: String, password: String, accept_privacy: bool) -> Dictionary:
+	return await _api(HTTPClient.METHOD_POST, "/auth/register", {
+		"username": username.strip_edges(), "email": email.strip_edges(), "password": password, "accept_privacy": accept_privacy})
 
 
 func resend_activation(email: String) -> Dictionary:
@@ -186,7 +192,7 @@ func _process(delta: float) -> void:
 			_set_connected(false)
 			if code in KICK_CODES:
 				_drop_session()
-				kicked.emit({4001: "unauthorized", 4002: "another_session", 4003: "kicked"}.get(code, "kicked"))
+				kicked.emit({4001: "unauthorized", 4002: "another_session", 4003: "kicked", 4007: "privacy_pending"}.get(code, "kicked"))
 
 
 func send(message: Dictionary) -> void:
