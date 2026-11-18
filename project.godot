@@ -22,6 +22,11 @@ SaveSystem="*res://autoload/save_system.gd"
 Music="*res://autoload/music.gd"
 Online="*res://autoload/online.gd"
 
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
 [display]
 
 window/size/viewport_width=1280

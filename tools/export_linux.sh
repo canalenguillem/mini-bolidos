@@ -28,10 +28,17 @@ Cómo jugar:
 Controles: flechas o WASD, Espacio = nitro, R = reaparecer, Esc = pausa. También mando.
 
 Requisitos: Ubuntu 18.10 o posterior (u otra distribución con glibc 2.28+) y una tarjeta
-gráfica con Vulkan u OpenGL 3.3. No hace falta instalar nada más.
+gráfica con OpenGL 3.3 (cualquier PC de los últimos 10 años). No hace falta instalar nada más.
 
 Tus datos (monedas, coches, récords) se guardan en ~/.local/share/godot/app_userdata/Mini Bólidos/
 TXT
 chmod +x "$PKG/mini-bolidos.x86_64"
 tar -C build -czf build/mini-bolidos-linux.tar.gz mini-bolidos-linux
-echo "✅ $(du -h build/mini-bolidos-linux.tar.gz | cut -f1)  build/mini-bolidos-linux.tar.gz"
+# Datos para la página de descargas del servidor (servidor/publish-download.sh los publica)
+SIZE=$(stat -c %s build/mini-bolidos-linux.tar.gz)
+SHA=$(sha256sum build/mini-bolidos-linux.tar.gz | cut -d' ' -f1)
+VERSION="$(date +%Y-%m-%d) · $(git rev-parse --short HEAD 2>/dev/null || echo sin-git)"
+cat > build/mini-bolidos-linux.json <<JSON
+{"file": "mini-bolidos-linux.tar.gz", "version": "$VERSION", "size": $SIZE, "sha256": "$SHA", "date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
+JSON
+echo "✅ $(du -h build/mini-bolidos-linux.tar.gz | cut -f1)  build/mini-bolidos-linux.tar.gz  ($VERSION)"
