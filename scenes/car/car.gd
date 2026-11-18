@@ -41,7 +41,9 @@ func setup(car_data: CarData, levels: Dictionary, upgrades: Dictionary = {}) -> 
 	data = car_data
 	stats = CarStats.build(car_data, levels, upgrades)
 	nitro_charges = stats.nitro_charges
-	if has_node("Body"):
+	if car_data.sprite != null:
+		set_sprite(car_data.sprite)
+	elif has_node("Body"):
 		set_body_color(car_data.color)
 
 
@@ -54,7 +56,15 @@ func nitro_fraction() -> float:
 	return _nitro_time_left / stats.nitro_duration if stats != null and stats.nitro_duration > 0.0 else 0.0
 
 
-## Color de la carrocería (placeholder visual).
+## Sustituye el placeholder de polígonos por un sprite (que mira hacia arriba: ya viene rotado en la escena).
+func set_sprite(texture: Texture2D) -> void:
+	($Sprite as Sprite2D).texture = texture
+	$Sprite.visible = texture != null
+	$Body.visible = texture == null
+	$Nose.visible = texture == null
+
+
+## Color de la carrocería (placeholder visual, solo si no hay sprite).
 func set_body_color(color: Color) -> void:
 	($Body as Polygon2D).color = color
 

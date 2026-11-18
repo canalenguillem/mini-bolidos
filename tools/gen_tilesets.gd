@@ -7,18 +7,26 @@ const TILE: int = 32
 ## Orden del atlas: debe coincidir con TrackBuilder.SURFACE_ATLAS y WALL_ATLAS.
 const ORDER: Array[String] = ["asphalt", "dirt", "sand", "mud", "grass", "water", "wall"]
 
+## Tiles lisos del pack Kenney Racing (CC0) de los que se saca la textura (mud reutiliza la tierra, oscurecida).
+const SOURCES: Dictionary = {
+	"asphalt": "res://assets/kenney_racing/PNG/Tiles/Asphalt road/road_asphalt13.png",
+	"dirt": "res://assets/kenney_racing/PNG/Tiles/Dirt/land_dirt05.png",
+	"sand": "res://assets/kenney_racing/PNG/Tiles/Sand/land_sand05.png",
+	"mud": "res://assets/kenney_racing/PNG/Tiles/Dirt/land_dirt05.png",
+	"grass": "res://assets/kenney_racing/PNG/Tiles/Grass/land_grass04.png",
+}
+
+## Por tema: con textura del pack, el color es un tinte multiplicado; sin ella (water, wall), el color base.
 const PALETTES: Dictionary = {
 	"west": {
-		"asphalt": Color(0.35, 0.35, 0.38), "dirt": Color(0.72, 0.52, 0.30),
-		"sand": Color(0.88, 0.78, 0.52), "mud": Color(0.40, 0.28, 0.18),
-		"grass": Color(0.50, 0.58, 0.30), "water": Color(0.25, 0.50, 0.75),
-		"wall": Color(0.55, 0.26, 0.17),
+		"asphalt": Color(1, 1, 1), "dirt": Color(1, 1, 1), "sand": Color(1, 1, 1),
+		"mud": Color(0.55, 0.45, 0.38), "grass": Color(0.85, 0.95, 0.7),
+		"water": Color(0.25, 0.50, 0.75), "wall": Color(0.55, 0.26, 0.17),
 	},
 	"jungle": {
-		"asphalt": Color(0.35, 0.35, 0.38), "dirt": Color(0.55, 0.42, 0.28),
-		"sand": Color(0.80, 0.75, 0.50), "mud": Color(0.33, 0.24, 0.14),
-		"grass": Color(0.30, 0.60, 0.25), "water": Color(0.20, 0.45, 0.60),
-		"wall": Color(0.08, 0.28, 0.12),
+		"asphalt": Color(1, 1, 1), "dirt": Color(0.85, 0.75, 0.62), "sand": Color(0.95, 0.92, 0.75),
+		"mud": Color(0.45, 0.36, 0.3), "grass": Color(0.7, 0.9, 0.65),
+		"water": Color(0.20, 0.45, 0.60), "wall": Color(0.08, 0.28, 0.12),
 	},
 }
 
@@ -65,14 +73,21 @@ func _build(palette: Dictionary) -> TileSet:
 func _make_texture(palette: Dictionary) -> ImageTexture:
 	var img := Image.create(TILE * ORDER.size(), TILE, false, Image.FORMAT_RGBA8)
 	for i: int in ORDER.size():
-		var base: Color = palette[ORDER[i]]
+		var id: String = ORDER[i]
+		var tint: Color = palette[id]
+		var source: Image = null
+		if SOURCES.has(id):
+			source = (load(SOURCES[id]) as Texture2D).get_image()
+			source.convert(Image.FORMAT_RGBA8)
+			source.resize(TILE, TILE, Image.INTERPOLATE_LANCZOS)
 		for y: int in TILE:
 			for x: int in TILE:
 				# Moteado determinista para que se aprecie el movimiento sobre suelo liso
 				var h: int = (x * 73856093) ^ (y * 19349663) ^ (i * 83492791)
-				var shade: float = 1.0 + (float(h & 15) / 15.0 - 0.5) * 0.10
+				var shade: float = 1.0 + (float(h & 15) / 15.0 - 0.5) * 0.08
+				var base: Color = source.get_pixel(x, y) * tint if source != null else tint
 				var c := Color(base.r * shade, base.g * shade, base.b * shade, 1.0)
-				if ORDER[i] == "wall" and (x < 2 or y < 2):
+				if id == "wall" and (x < 2 or y < 2):
 					c = c.lightened(0.15)
 				img.set_pixel(i * TILE + x, y, c)
 	return ImageTexture.create_from_image(img)

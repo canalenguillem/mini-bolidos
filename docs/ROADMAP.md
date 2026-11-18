@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M7** (parcial: arte, audio y Android pendientes; M5 y M6 validados)
+Hito actual: **M7** (parcial: audio y Android pendientes; M5 y M6 validados)
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
@@ -56,7 +56,7 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Mejores tiempos por pista
 
 ## M7 — Pulido y Android
-- [ ] Arte final (pack CC0) — pendiente: el humano descarga el pack a `assets/`
+- [x] Arte final (pack CC0 Kenney Racing): coches, barriles y textura de los tiles. Cactus, troncos y tren siguen como polígonos (el pack no los trae)
 - [x] Animación de ruedas (placeholder)
 - [x] Partículas: polvo, barro, salpicaduras, nitro y marcas de derrape (placeholder de color por superficie)
 - [ ] Audio: motor con pitch, derrape, choques y música por tema

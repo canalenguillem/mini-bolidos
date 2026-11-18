@@ -18,6 +18,8 @@ var _ref: Dictionary = {}  ## propiedad → valor de referencia (el máximo posi
 @onready var _car_list: VBoxContainer = $Margin/Root/Body/CarsPanel/CarList
 @onready var _preview: Control = $Margin/Root/Body/MidPanel/Preview
 @onready var _car_body: Polygon2D = $Margin/Root/Body/MidPanel/Preview/CarBody
+@onready var _car_nose: Polygon2D = $Margin/Root/Body/MidPanel/Preview/CarNose
+@onready var _car_sprite: Sprite2D = $Margin/Root/Body/MidPanel/Preview/CarSprite
 @onready var _car_name: Label = $Margin/Root/Body/MidPanel/CarName
 @onready var _car_desc: Label = $Margin/Root/Body/MidPanel/CarDesc
 @onready var _car_action: Button = $Margin/Root/Body/MidPanel/CarAction
@@ -97,6 +99,10 @@ func _refresh_cars() -> void:
 func _refresh_car_detail() -> void:
 	var car: CarData = GameState.cars[_view_id]
 	_car_body.color = car.color
+	_car_sprite.texture = car.sprite
+	_car_sprite.visible = car.sprite != null
+	_car_body.visible = car.sprite == null
+	_car_nose.visible = car.sprite == null
 	_car_name.text = car.display_name
 	_car_desc.text = car.description
 	if GameState.owned_cars.has(_view_id):

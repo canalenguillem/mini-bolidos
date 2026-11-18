@@ -136,7 +136,10 @@ func _add_racer(rival: RivalData, xform: Transform2D) -> Racer:
 	racer.car.track = track
 	racer.car.teleport(xform)
 	if rival != null:
-		racer.car.set_body_color(rival.color)
+		if rival.sprite != null:
+			racer.car.set_sprite(rival.sprite)
+		else:
+			racer.car.set_body_color(rival.color)
 	racer.car.reset_requested.connect(_respawn.bind(racer))
 	racers.append(racer)
 	return racer
