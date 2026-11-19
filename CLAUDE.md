@@ -26,6 +26,7 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude
 godot --path . res://scenes/race/race.tscn # ejecutar una escena (necesita pantalla)
 ./tools/export_linux.sh                            # ejecutable de Linux + build/mini-bolidos-linux.tar.gz (necesita las plantillas de exportación)
 ./tools/export_windows.sh                          # ejecutable de Windows + build/mini-bolidos-windows.zip
+./tools/export_macos.sh                            # .app universal firmado ad hoc + build/mini-bolidos-macos.zip (sin firma de Apple: solo se puede probar en un Mac)
 ```
 
 ## Estructura
