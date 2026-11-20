@@ -157,3 +157,29 @@ func _rivals_lapped(race: RaceManager) -> bool:
 
 func after_each() -> void:
 	Engine.time_scale = 1.0
+
+
+func test_hay_linea_de_meta_a_la_anchura_de_la_calzada() -> void:
+	for id: String in TRACK_IDS:
+		var track: Track = _instance(id)
+		var line: FinishLine = track.get_node_or_null("FinishLine") as FinishLine
+		assert_not_null(line, "%s: línea de meta" % id)
+		var width: float = line.left + line.right
+		assert_between(width, 230.0, 460.0, "%s: ancho de la línea (%.0f px)" % [id, width])
+		assert_lt(line.global_position.distance_to(track.get_respawn_transform(0).origin), 1.0, "%s: en el checkpoint 0" % id)
+		assert_almost_eq(line.global_rotation, track.get_respawn_transform(0).get_rotation(), 0.01, "%s: orientada al avance" % id)
+		# La línea no se sale del suelo: sus dos extremos están sobre la calzada o el arcén
+		var ground: TileMapLayer = track.get_node("Ground") as TileMapLayer
+		for side: float in [-1.0, 1.0]:
+			var reach: float = line.left if side < 0.0 else line.right
+			var p: Vector2 = line.global_position + line.global_transform.y * side * (reach - 6.0)
+			assert_ne(ground.get_cell_source_id(ground.local_to_map(ground.to_local(p))), -1, "%s: extremo %s sobre el suelo" % [id, side])
+
+
+func test_solo_hay_una_linea_de_meta() -> void:
+	var track: Track = _instance("west_01")
+	var n: int = 0
+	for c: Node in track.get_children():
+		if c is FinishLine:
+			n += 1
+	assert_eq(n, 1)

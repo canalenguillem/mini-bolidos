@@ -8,6 +8,9 @@ extends CanvasLayer
 @onready var _nitro_label: Label = $NitroLabel
 @onready var _nitro_bar: ProgressBar = $NitroBar
 @onready var _countdown: Label = $CountdownLabel
+@onready var _banner: Label = $BannerLabel
+
+var _banner_left: float = 0.0
 
 
 func set_lap(lap: int, total: int) -> void:
@@ -31,3 +34,17 @@ func set_nitro(charges: int, boosting: bool, fraction: float) -> void:
 func set_countdown(text: String) -> void:
 	_countdown.text = text
 	_countdown.visible = not text.is_empty()
+
+
+## Aviso grande bajo el reloj (fin de vuelta, última vuelta…) que se apaga solo.
+func show_banner(text: String, seconds: float = 2.2) -> void:
+	_banner.text = text
+	_banner.visible = true
+	_banner_left = seconds
+
+
+func _process(delta: float) -> void:
+	if _banner_left > 0.0:
+		_banner_left -= delta
+		if _banner_left <= 0.0:
+			_banner.visible = false

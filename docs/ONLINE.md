@@ -72,10 +72,10 @@ Con 5 jugadores humanos la sala arranca sola, sin bots. Errores (`reason`): `alr
 1. `{"t":"start","room","track","laps","checkpoints","countdown_ms","host_id","players":[{slot,user_id,username,bot}]}`: empieza la cuenta atrás. La pista la elige el servidor por rotación (`west_01`, `west_02`, `jungle_01`, `jungle_02`). `slot` (0-4) es el puesto en la parrilla.
 2. `{"t":"go"}`: salida. El reloj de la carrera es el del servidor.
 3. Durante la carrera, cada cliente simula **su** coche y envía:
-   - `{"t":"state","x","y","r","vx","vy"}` unas 15 veces por segundo (posición, ángulo en radianes y velocidad). Valores no numéricos o fuera de ±100 000 se descartan; más de 40 por segundo, también.
+   - `{"t":"state","x","y","r","vx","vy","ts"}` unas 20 veces por segundo (posición, ángulo en radianes, velocidad y `ts`: hora del emisor en ms desde que empezó su carrera, opcional). Los demás interpolan sobre esa hora, no sobre la de llegada, y así el jitter de la red no se nota. Valores no numéricos o fuera de ±100 000 se descartan; más de 40 por segundo, también.
    - `{"t":"cp","i":N}` al pasar por el checkpoint N. El servidor lo valida igual que `LapTracker` (en orden, el 0 es la meta, sin saltarse ni repetir) y descarta los que llegan antes de lo que permite la velocidad máxima (`MAX_SPEED_PX_S`).
 4. El **anfitrión** (`host_id`: el humano conectado con el puesto más bajo) simula también a los bots: envía `state` y `cp` con un campo extra `"slot": <puesto del bot>`. Nadie más puede controlar a un bot ni a otro humano. Si el anfitrión se desconecta, llega `{"t":"host","user_id":…}` con el nuevo.
-5. El servidor reenvía `{"t":"states","ms","cars":[{s,x,y,r,vx,vy,l,c}]}` (`l` vueltas y `c` último checkpoint, ambos autoritativos) unas 15 veces por segundo. Cada cliente ignora su propio puesto.
+5. El servidor reenvía `{"t":"states","ms","cars":[{s,x,y,r,vx,vy,l,c,ts}]}` (`l` vueltas y `c` último checkpoint, ambos autoritativos; `ts` es la hora del emisor, si la envió) hasta 30 veces por segundo. Cada cliente ignora su propio puesto.
 6. `{"t":"finish","slot","username","bot","time_ms","position"}` cuando alguien completa las vueltas. **El tiempo lo calcula el servidor**, no el cliente.
 7. `{"t":"results","track","results":[{position,slot,user_id,username,bot,finished,time_ms,suspicious}]}`: al terminar todos los humanos conectados, a los 90 s de llegar el primero, o a los 10 min. Quien no termina se ordena por progreso. En ese momento la sala se disuelve y todos pueden buscar otra.
 
@@ -85,7 +85,7 @@ Los resultados se guardan en MariaDB (`races`, `race_results`) y una telemetría
 
 - `scripts/online_client.gd` (`OnlineClient`) habla con el servidor: cuenta por HTTP y salas/carreras por WebSocket, con señales para cada mensaje. El autoload `Online` es una instancia, para que la sesión y la conexión sobrevivan a los cambios de escena. Guarda solo el servidor y el último usuario en `user://online.json`; **nunca la contraseña**. El servidor por defecto es `https://bolidos.enguillem.es`; se cambia en la pantalla de login o con `-- --server=URL`.
 - Escenas: `online_login` (entrar/registrarse), `online_lobby` (salas y sala de espera) y `online_race` (`OnlineRace`, que hereda de `RaceManager`).
-- En `OnlineRace` cada cliente simula su coche y los demás son fantasmas (`Car.make_ghost()`) que se interpolan y extrapolan con su velocidad. **No hay choques entre coches online** (cada cliente simularía una colisión distinta); sí con paredes y obstáculos. Barriles y troncos no se sincronizan (cada cliente ve los suyos); los trenes arrancan a la vez en la salida.
+- En `OnlineRace` cada cliente simula su coche y los demás son fantasmas (`Car.make_ghost()`). Un fantasma **se dibuja ~0,12 s por detrás** y se interpola entre los dos paquetes que rodean ese instante (si no llega ninguno, sigue con su velocidad un máximo de 0,25 s). Se mueve en `_process`, no en la física, para que sea fluido a 144 Hz. **No hay choques entre coches online** (cada cliente simularía una colisión distinta); sí con paredes y obstáculos. Barriles y troncos no se sincronizan (cada cliente ve los suyos); los trenes arrancan a la vez en la salida.
 - Todos conducen el coche base sin mejoras para que sea justo en el aula (`OnlineRace.use_garage_car` lo cambia). No hay monedas ni premios online.
 - Verificación sin pantalla: `tools/online_smoke.gd` corre una carrera completa de 1 a 5 jugadores contra un servidor real (crea las cuentas con el admin y las borra). `tools/online_demo.gd` graba capturas del flujo. Los tests de GUT usan un WebSocket y un HTTP falsos (`tests/fake_online.gd`).
 
@@ -94,3 +94,10 @@ Los resultados se guardan en MariaDB (`races`, `race_results`) y una telemetría
 - La parrilla de las pistas tiene hoy 4 puestos (`Track.GRID_SLOTS`); online hacen falta 5.
 - `docs/online_tracks.json` (generado con `tools/export_online_tracks.gd`) tiene `checkpoints` y `length_px` de cada pista. El servidor lleva una copia en `backend/app/game/tracks.json`: **hay que copiarla cada vez que cambie una pista o su número de checkpoints**.
 - Los bots usan el `AIController` ya existente, simulados solo en el cliente anfitrión.
+
+## Lo que falló la primera vez que se probó en clase (y por qué)
+
+- **No se contaban las vueltas y la carrera no acababa:** `Car.make_online_local()` ponía `collision_layer = 0` para que los coches no chocaran entre sí, pero los checkpoints (`Area2D`, máscara 2) solo detectan cuerpos de la **capa 2**. Se arregló dejando los coches simulados en la capa 2 y quitando la capa 2 de su **máscara**. Las pruebas no lo vieron porque disparaban la señal del checkpoint a mano: hay pruebas con teletransporte sobre los `Area2D` reales (`test_online_race.gd`).
+- **Los otros jugadores iban a tirones:** cada paquete recolocaba el objetivo en una posición ya vieja y el fantasma se frenaba o retrocedía 15 veces por segundo. Ahora se interpola con retardo sobre la hora del emisor (ver arriba) y se envía a 20 Hz.
+- **Los coches giraban demasiado:** con teclado un toque era giro máximo. El volante sube y baja de forma progresiva (`PlayerController`), a velocidad máxima conserva el 70 % del giro (`Car.steer_speed_mult`) y cada jugador ajusta su sensibilidad en Opciones (`GameState.steer_sensitivity`, 40-100 %, por defecto 85 %).
+- Además: línea de meta a cuadros dibujada en la pista (`FinishLine`) y aviso en pantalla con el tiempo de cada vuelta.

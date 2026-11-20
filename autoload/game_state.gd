@@ -17,6 +17,9 @@ var last_prize: int = 0  ## premio de la última carrera (para la pantalla de re
 var last_record: bool = false  ## la última carrera batió el mejor tiempo de la pista
 var last_championship_prize: int = 0  ## premio final si la última carrera cerró un campeonato
 var current_championship: Championship  ## campeonato en curso (null en carrera rápida; no se guarda)
+var steer_sensitivity: float = 0.85:  ## 0,4..1: cuánto gira el volante del jugador (solo el suyo)
+	set(value):
+		steer_sensitivity = clampf(value, 0.4, 1.0)
 var master_volume: float = 1.0:  ## 0..1; se aplica al bus Master
 	set(value):
 		master_volume = clampf(value, 0.0, 1.0)
@@ -53,6 +56,7 @@ func reset() -> void:
 	last_championship_prize = 0
 	current_championship = null
 	master_volume = 1.0
+	steer_sensitivity = 0.85
 	unlocked_tracks = []
 	for id: String in tracks:
 		if (tracks[id] as TrackData).unlock_cost <= 0:
@@ -216,6 +220,7 @@ func to_dict() -> Dictionary:
 		"unlocked_tracks": unlocked_tracks,
 		"best_times": best_times,
 		"master_volume": master_volume,
+		"steer_sensitivity": steer_sensitivity,
 	}
 
 
@@ -252,6 +257,9 @@ func from_dict(data: Dictionary) -> void:
 			if id is String and tracks.has(id) and not unlocked_tracks.has(id):
 				unlocked_tracks.append(id)
 
+	var sensitivity: Variant = data.get("steer_sensitivity")
+	if sensitivity is float or sensitivity is int:
+		steer_sensitivity = float(sensitivity)
 	var volume: Variant = data.get("master_volume")
 	if volume is float or volume is int:
 		master_volume = float(volume)

@@ -13,6 +13,7 @@ signal reset_requested  ## el piloto pide reaparecer (tecla R)
 @export var car_bump_impulse: float = 140.0
 @export var barrel_push: float = 0.9  ## fracción del impacto que se transmite a los cuerpos rígidos (barriles)
 @export var barrel_drag: float = 0.15  ## velocidad que se pierde al empujar uno de frente
+@export var steer_speed_mult: float = 0.7  ## fracción del giro que se conserva a velocidad máxima (a poca velocidad, el 100 %)
 @export var nitro_accel_mult: float = 1.5  ## multiplicador de aceleración con nitro
 
 var stats: CarStats
@@ -25,10 +26,13 @@ var controller: CarController
 var ghost: bool = false  ## coche remoto (online): sin física, sigue la posición que llega por red
 var _fx: CarFx
 var _audio: CarAudio
-var _net_pos: Vector2
-var _net_rot: float = 0.0
-var _net_vel: Vector2 = Vector2.ZERO
-var _net_ready: bool = false
+var ghost_delay: float = 0.12  ## s de retraso con los que se dibuja un fantasma, para poder interpolar entre dos paquetes
+var ghost_max_extrapolation: float = 0.25  ## s máximos que sigue con su velocidad si no llegan paquetes
+var clock: Callable = func() -> float: return Time.get_ticks_msec() / 1000.0  ## las pruebas lo sustituyen
+var _snapshots: Array[Dictionary] = []  ## paquetes recibidos: {t (hora del emisor), pos, rot, vel}
+var _offsets: Array[float] = []  ## llegada - hora del emisor, de los últimos paquetes
+var _offset: float = 0.0  ## el menor de ellos: la hora del emisor que corresponde a "ahora" sin jitter
+var _fx_accum: float = 0.0
 var _name_tag: Label
 var _nitro_time_left: float = 0.0
 var _default_surface: SurfaceData = preload("res://data/surfaces/asphalt.tres")
@@ -64,19 +68,28 @@ func make_ghost() -> void:
 
 ## Coche online que sí simula (el tuyo o un bot que gobierna el anfitrión): no choca con otros coches.
 func make_online_local() -> void:
-	collision_layer = 0
-	collision_mask = 9  # paredes (1) y obstáculos (4)
+	collision_layer = 2  # sigue en la capa de coches: los checkpoints solo detectan esa capa
+	collision_mask = 9  # pero solo choca con paredes (1) y obstáculos (4), no con otros coches
 
 
-## Última posición conocida de un coche remoto (llega ~15 veces por segundo).
-func net_update(pos: Vector2, rot: float, vel: Vector2) -> void:
-	_net_pos = pos
-	_net_rot = rot
-	_net_vel = vel
-	if not _net_ready:
-		_net_ready = true
+## Posición de un coche remoto que acaba de llegar por red (~20 veces por segundo). `ts` es la hora del emisor
+## (segundos): así los paquetes quedan igual de separados que cuando se enviaron, aunque lleguen con jitter.
+## Sin `ts` se usa la hora de llegada. El fantasma se dibuja `ghost_delay` segundos por detrás para poder interpolar.
+func net_update(pos: Vector2, rot: float, vel: Vector2, ts: float = -1.0) -> void:
+	var now: float = clock.call()
+	var stamp: float = now
+	if ts >= 0.0:
+		stamp = ts
+		_offsets.append(now - ts)
+		if _offsets.size() > 60:
+			_offsets.pop_front()
+		_offset = _offsets.min()  # el paquete menos retrasado fija la correspondencia entre relojes
+	if _snapshots.is_empty():
 		global_position = pos
 		rotation = rot
+	_snapshots.append({"t": stamp, "pos": pos, "rot": rot, "vel": vel})
+	if _snapshots.size() > 40:
+		_snapshots.pop_front()
 
 
 ## Texto flotante con el nombre del piloto.
@@ -93,27 +106,58 @@ func set_name_tag(text: String) -> void:
 	_name_tag.reset_size()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if ghost:
+		_ghost_render(delta)  # a la cadencia de la pantalla, no de la física: así se ve fluido a 144 Hz
 	if _name_tag != null:
 		_name_tag.global_position = global_position + Vector2(-_name_tag.size.x / 2.0, -34.0)
 
 
-func _ghost_step(delta: float) -> void:
-	if not _net_ready:
+## Dibuja el fantasma en su instante de render (ahora - ghost_delay) a partir de los paquetes recibidos.
+func _ghost_render(delta: float) -> void:
+	if _snapshots.is_empty():
 		return  # aún no ha llegado ninguna posición: se queda en su puesto de la parrilla
-	_net_pos += _net_vel * delta  # entre dos paquetes sigue avanzando con su velocidad
-	var k: float = 1.0 - exp(-12.0 * delta)
-	global_position = global_position.lerp(_net_pos, k)
-	rotation = lerp_angle(rotation, _net_rot, k)
-	velocity = _net_vel
+	var render_t: float = float(clock.call()) - _offset - ghost_delay  # en la línea de tiempo del emisor
+	var state: Dictionary = _sample(render_t)
+	global_position = state["pos"]
+	rotation = state["rot"]
+	velocity = state["vel"]
+	_fx_accum += delta
+	if _fx_accum < 1.0 / 60.0:
+		return  # efectos y sonido a 60 Hz como el resto, aunque la pantalla sea de 144
+	var dt: float = _fx_accum
+	_fx_accum = 0.0
 	var fwd: float = velocity.dot(transform.x)
 	var lat: float = velocity.dot(transform.y)
 	var surface: SurfaceData = track.get_surface_at(global_position) if track else _default_surface
 	current_surface = surface
 	if _fx != null:
-		_fx.update_state(delta, fwd, lat, 0.0, surface, false)
+		_fx.update_state(dt, fwd, lat, 0.0, surface, false)
 	if _audio != null and stats != null:
-		_audio.update_state(delta, fwd, lat, false, stats.max_speed)
+		_audio.update_state(dt, fwd, lat, false, stats.max_speed)
+
+
+## Estado interpolado en el instante t; si t es posterior al último paquete, sigue con su velocidad un tiempo limitado.
+func _sample(t: float) -> Dictionary:
+	var first: Dictionary = _snapshots[0]
+	var last: Dictionary = _snapshots[_snapshots.size() - 1]
+	if t <= float(first["t"]):
+		return first
+	if t >= float(last["t"]):
+		var ahead: float = minf(t - float(last["t"]), ghost_max_extrapolation)
+		return {"pos": (last["pos"] as Vector2) + (last["vel"] as Vector2) * ahead, "rot": last["rot"], "vel": last["vel"]}
+	for i: int in range(_snapshots.size() - 1, 0, -1):
+		var b: Dictionary = _snapshots[i]
+		var a: Dictionary = _snapshots[i - 1]
+		if float(a["t"]) <= t:
+			var span: float = float(b["t"]) - float(a["t"])
+			var f: float = 0.0 if span <= 0.0 else (t - float(a["t"])) / span
+			return {
+				"pos": (a["pos"] as Vector2).lerp(b["pos"], f),
+				"rot": lerp_angle(float(a["rot"]), float(b["rot"]), f),
+				"vel": (a["vel"] as Vector2).lerp(b["vel"], f),
+			}
+	return first
 
 
 func is_boosting() -> bool:
@@ -151,8 +195,7 @@ func _physics_process(delta: float) -> void:
 	if stats == null:
 		return
 	if ghost:
-		_ghost_step(delta)
-		return
+		return  # su movimiento lo dibuja _process (_ghost_render)
 	var input: DriveInput = DriveInput.new() if locked else controller.get_input(delta)
 	if input.reset:
 		reset_requested.emit()
@@ -187,7 +230,8 @@ func _physics_process(delta: float) -> void:
 
 	# --- Giro (no se gira parado; la marcha atrás invierte el volante) ---
 	var speed_factor: float = clampf(absf(fwd) / turn_speed_ref, 0.0, 1.0)
-	rotation += input.steer * stats.steering * speed_factor * signf(fwd) * delta
+	var steer_scale: float = lerpf(1.0, steer_speed_mult, clampf(absf(fwd) / maxf(stats.max_speed, 1.0), 0.0, 1.0))
+	rotation += input.steer * stats.steering * steer_scale * speed_factor * signf(fwd) * delta
 
 	# --- Agarre lateral / derrape ---
 	var drifting: bool = input.brake > 0.0 and absf(input.steer) > 0.5 and fwd > turn_speed_ref

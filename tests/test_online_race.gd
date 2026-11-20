@@ -55,7 +55,7 @@ func test_los_cinco_coches_y_quien_los_lleva() -> void:
 	assert_true(_racer(3).car.ghost and _racer(4).car.ghost, "los bots, si no soy anfitrión, también")
 	for slot: int in [0, 1, 3, 4]:
 		assert_true(_racer(slot).remote, "slot %d" % slot)
-		assert_eq(_racer(slot).car.collision_layer, 0)
+		assert_eq(_racer(slot).car.collision_layer, 0, "un fantasma no activa checkpoints")
 
 
 func test_el_anfitrion_lleva_a_los_bots() -> void:
@@ -71,8 +71,9 @@ func test_el_anfitrion_lleva_a_los_bots() -> void:
 func test_nadie_choca_con_otros_coches() -> void:
 	await _start(ME)
 	for r: RaceManager.Racer in _race.racers:
-		assert_eq(r.car.collision_layer, 0, "capa de %s" % r.display_name)
-		assert_eq(r.car.collision_mask & 2, 0, "ni mira a la capa de coches")
+		assert_eq(r.car.collision_mask & 2, 0, "%s no choca con otros coches" % r.display_name)
+		# los que simulan están en la capa de coches (los checkpoints los detectan); los fantasmas, en ninguna
+		assert_eq(r.car.collision_layer, 0 if r.car.ghost else 2, "capa de %s" % r.display_name)
 
 
 func test_parrilla_en_los_puestos_del_servidor() -> void:
@@ -223,13 +224,13 @@ func test_un_no_anfitrion_no_envia_nada_de_los_bots() -> void:
 	assert_false(slots.has(3) or slots.has(4) or slots.has(0))
 
 
-func test_el_estado_se_envia_a_unas_15_veces_por_segundo() -> void:
+func test_el_estado_se_envia_a_unas_20_veces_por_segundo() -> void:
 	await _start(10)
 	_client._dispatch({"t": "go"})
 	_socket.sent.clear()
 	await wait_physics_frames(60)  # ~1 s
 	var n: int = _socket.sent_of("state").size()
-	assert_between(n, 10, 20)
+	assert_between(n, 16, 26)
 
 
 func test_si_el_anfitrion_se_va_heredo_a_los_bots() -> void:
@@ -364,3 +365,74 @@ func test_la_posicion_del_hud_usa_vueltas_ajenas_del_servidor() -> void:
 	assert_eq(by_slot.find(0), 0, "ana (1 vuelta) va primera")
 	assert_lt(by_slot.find(0), by_slot.find(1))
 	assert_lt(by_slot.find(1), by_slot.find(2), "yo, en la salida, voy detrás")
+
+
+## Regresión: online no se contaban las vueltas porque los coches no estaban en la capa que detectan los
+## checkpoints. Aquí el coche pasa por las Area2D reales (sin disparar la señal a mano).
+func test_los_checkpoints_reales_detectan_mi_coche_y_se_avisa_al_servidor() -> void:
+	await _start()
+	_client._dispatch({"t": "go"})
+	_socket.sent.clear()
+	var n: int = _race.track.checkpoint_count
+	for i: int in range(1, n):
+		_race.player.car.teleport(_race.track.get_respawn_transform(i))
+		await wait_physics_frames(3)
+	_race.player.car.teleport(_race.track.get_respawn_transform(0))
+	await wait_physics_frames(3)
+	var cps: Array = _socket.sent_of("cp").map(func(m: Dictionary) -> int: return int(m["i"]))
+	var expected: Array = []
+	for i: int in range(1, n):
+		expected.append(i)
+	expected.append(0)
+	assert_eq(cps, expected, "una vuelta entera de checkpoints, en orden")
+	assert_eq(_race.player.tracker.laps, 1)
+	var banner: Label = _race._hud._banner
+	assert_true(banner.visible, "aviso de fin de vuelta")
+	assert_string_contains(banner.text, "Vuelta 1/2")
+	assert_string_contains(banner.text, "ÚLTIMA VUELTA", "con 2 vueltas, al cerrar la 1ª empieza la última")
+
+
+func test_los_bots_del_anfitrion_tambien_pasan_por_los_checkpoints_reales() -> void:
+	await _start(ME)
+	_client._dispatch({"t": "go"})
+	_socket.sent.clear()
+	_racer(3).car.teleport(_race.track.get_respawn_transform(1))
+	await wait_physics_frames(3)
+	var cps: Array[Dictionary] = _socket.sent_of("cp")
+	assert_eq(cps.size(), 1)
+	assert_eq([int(cps[0]["i"]), int(cps[0]["slot"])], [1, 3])
+
+
+func test_un_fantasma_no_activa_checkpoints() -> void:
+	await _start()
+	_client._dispatch({"t": "go"})
+	_socket.sent.clear()
+	_racer(0).car.teleport(_race.track.get_respawn_transform(1))
+	await wait_physics_frames(3)
+	assert_eq(_socket.sent_of("cp").size(), 0)
+
+
+func test_las_posiciones_enviadas_llevan_la_hora_del_emisor() -> void:
+	await _start()
+	_client._dispatch({"t": "go"})
+	_socket.sent.clear()
+	await wait_physics_frames(30)
+	var states: Array[Dictionary] = _socket.sent_of("state")
+	assert_gte(states.size(), 5)
+	var last: int = -1
+	for st: Dictionary in states:
+		assert_true(st.has("ts"), "cada posición lleva su hora")
+		assert_gte(int(st["ts"]), last, "las horas no retroceden")
+		last = int(st["ts"])
+
+
+func test_los_fantasmas_usan_la_hora_del_emisor_que_llega_del_servidor() -> void:
+	await _start()
+	_client._dispatch({"t": "go"})
+	_client._dispatch({"t": "states", "ms": 0, "cars": [
+		{"s": 0, "x": 100.0, "y": 0.0, "r": 0.0, "vx": 0.0, "vy": 0.0, "l": 0, "c": 0, "ts": 5000}]})
+	_client._dispatch({"t": "states", "ms": 0, "cars": [
+		{"s": 0, "x": 120.0, "y": 0.0, "r": 0.0, "vx": 0.0, "vy": 0.0, "l": 0, "c": 0, "ts": 5050}]})
+	var snaps: Array = _racer(0).car._snapshots
+	assert_eq(snaps.size(), 2)
+	assert_almost_eq(float(snaps[1]["t"]) - float(snaps[0]["t"]), 0.05, 0.0001, "separados como cuando se enviaron")

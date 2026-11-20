@@ -84,7 +84,7 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Menú: "Jugar solo" (como ahora) u "Online" (login/registro contra el servidor)
 - [x] Lista de salas, entrar en cola, cuenta atrás sincronizada
 - [x] Coches remotos con interpolación, posiciones y resultados compartidos
-- [ ] **Humano:** carrera real con 5 jugadores
+- [ ] **Humano:** carrera real con 5 jugadores (la primera prueba en clase destapó 3 fallos, corregidos; hay que repetirla con la versión nueva)
 
 ## M11 — Operación
 - [x] Dominio `bolidos.enguillem.es` y HTTPS (los gestiona el profesor)

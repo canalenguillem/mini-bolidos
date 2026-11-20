@@ -156,7 +156,7 @@ func test_los_mensajes_salientes() -> void:
 	_client.start_room()
 	_client.request_rooms()
 	_client.send_state(Vector2(10.5, 20), 1.5, Vector2(100, -5))
-	_client.send_state(Vector2(1, 2), 0.0, Vector2.ZERO, 3)
+	_client.send_state(Vector2(1, 2), 0.0, Vector2.ZERO, 3, 4200)
 	_client.send_checkpoint(4)
 	_client.send_checkpoint(5, 2)
 	var kinds: Array = _socket.sent.map(func(m: Dictionary) -> Variant: return m["t"])
@@ -167,6 +167,8 @@ func test_los_mensajes_salientes() -> void:
 	assert_eq([own["x"], own["y"], own["r"], own["vx"], own["vy"]], [10.5, 20.0, 1.5, 100.0, -5.0])
 	assert_false(own.has("slot"))
 	assert_eq(_socket.sent_of("state")[1]["slot"], 3)
+	assert_false(own.has("ts"), "sin hora, no se envía")
+	assert_eq(int(_socket.sent_of("state")[1]["ts"]), 4200)
 	assert_false(_socket.sent_of("cp")[0].has("slot"))
 	assert_eq(_socket.sent_of("cp")[1]["slot"], 2)
 

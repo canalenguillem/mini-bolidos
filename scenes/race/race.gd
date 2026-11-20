@@ -36,6 +36,7 @@ class Racer extends RefCounted:
 	var stuck_time: float = 0.0
 	var respawn_count: int = 0
 	var finish_time: float = -1.0
+	var lap_started: float = 0.0  ## race_time al empezar la vuelta en curso
 	var slot: int = -1  ## puesto de parrilla (online)
 	var user_id: int = -1
 	var remote: bool = false  ## lo simula otro cliente
@@ -188,10 +189,24 @@ func _on_checkpoint_passed(car: Car, index: int) -> void:
 
 func _on_lap_completed(lap: int, racer: Racer) -> void:
 	Events.lap_completed.emit(racer.car, lap)
+	_announce_lap(lap, racer)
 	if racer.tracker.finished:
 		racer.finish_time = race_time
 		if racer.is_player:
 			_finish_race()
+
+
+## Aviso en pantalla con el tiempo de la vuelta que acaba de cerrar el jugador (y "última vuelta" si toca).
+func _announce_lap(lap: int, racer: Racer) -> void:
+	var lap_time: float = race_time - racer.lap_started
+	racer.lap_started = race_time
+	if not racer.is_player or racer.tracker.finished:
+		return
+	var text: String = "Vuelta %d/%d  ·  %s" % [lap, racer.tracker.total_laps, RaceTime.format(lap_time)]
+	if lap == racer.tracker.total_laps - 1:
+		text += "\n¡ÚLTIMA VUELTA!"
+	_hud.show_banner(text)
+	_sounds.lap()
 
 
 func _finish_race() -> void:

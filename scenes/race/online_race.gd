@@ -6,7 +6,7 @@ extends RaceManager
 ## Hereda del RaceManager local: HUD, posiciones, reaparición y pantalla de resultados.
 
 const LOBBY_SCENE: String = "res://scenes/ui/online_lobby.tscn"
-const SEND_INTERVAL: float = 1.0 / 15.0
+const SEND_INTERVAL: float = 1.0 / 20.0  ## 20 envíos por segundo
 const SLOT_SPRITES: Array[String] = ["beetle", "buggy", "rayo", "bruto", "despiste"]
 const BOT_RIVALS: Array[String] = ["rayo", "bruto", "despiste"]
 
@@ -20,6 +20,7 @@ var _slot_racers: Dictionary = {}  ## puesto → Racer
 var _send_left: float = 0.0
 var _host_id: int = -1
 var _go_received: bool = false
+var _race_clock_start_ms: int = 0  ## Time.get_ticks_msec() al salir: base de la hora que se envía con cada posición
 
 
 func _ready() -> void:
@@ -151,6 +152,7 @@ func _physics_process(delta: float) -> void:
 
 func _begin_race() -> void:
 	super._begin_race()
+	_race_clock_start_ms = Time.get_ticks_msec()
 	for node: Node in track.get_node("Obstacles").get_children():
 		if node is Train:
 			(node as Train).reset_time()  # los trenes arrancan a la vez en todos los clientes
@@ -160,7 +162,8 @@ func _send_states() -> void:
 	for racer: Racer in racers:
 		if racer.remote or racer.finish_time >= 0.0:
 			continue
-		online.send_state(racer.car.global_position, racer.car.rotation, racer.car.velocity, racer.slot if racer.bot else -1)
+		online.send_state(racer.car.global_position, racer.car.rotation, racer.car.velocity,
+				racer.slot if racer.bot else -1, Time.get_ticks_msec() - _race_clock_start_ms)
 
 
 # --- Mensajes del servidor ---
@@ -176,7 +179,8 @@ func _on_net_states(msg: Dictionary) -> void:
 		var racer: Racer = _slot_racers.get(int(c["s"]))
 		if racer == null or not racer.remote:
 			continue
-		racer.car.net_update(Vector2(float(c["x"]), float(c["y"])), float(c["r"]), Vector2(float(c["vx"]), float(c["vy"])))
+		var ts: float = float(c["ts"]) / 1000.0 if c.has("ts") else -1.0  # hora del emisor, si la manda
+		racer.car.net_update(Vector2(float(c["x"]), float(c["y"])), float(c["r"]), Vector2(float(c["vx"]), float(c["vy"])), ts)
 		racer.tracker.laps = int(c["l"])
 		racer.tracker.last_checkpoint = int(c["c"])
 
@@ -254,6 +258,7 @@ func _on_checkpoint_passed(car: Car, index: int) -> void:
 
 func _on_lap_completed(lap: int, racer: Racer) -> void:
 	Events.lap_completed.emit(racer.car, lap)
+	_announce_lap(lap, racer)
 	if racer.tracker.finished and racer.finish_time < 0.0:
 		racer.finish_time = race_time
 		if racer.is_player:

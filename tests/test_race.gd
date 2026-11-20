@@ -77,3 +77,19 @@ func test_tecla_r_reaparece() -> void:
 	racer.car.global_position += Vector2(0, 5)
 	racer.car.reset_requested.emit()
 	assert_lt(racer.car.global_position.distance_to(_race.track.get_respawn_transform(0).origin), 1.0)
+
+
+func test_al_cerrar_una_vuelta_sale_el_aviso_con_su_tiempo() -> void:
+	await _start()
+	await wait_physics_frames(15)  # termina la cuenta atrás
+	var n: int = _race.track.checkpoint_count
+	for i: int in range(1, n):
+		_race.player.car.teleport(_race.track.get_respawn_transform(i))
+		await wait_physics_frames(3)
+	_race.player.car.teleport(_race.track.get_respawn_transform(0))
+	await wait_physics_frames(3)
+	var banner: Label = _race._hud._banner
+	assert_true(banner.visible, "se ve el aviso")
+	assert_string_contains(banner.text, "Vuelta 1/3")
+	assert_string_contains(banner.text, ":")
+	assert_false(banner.text.contains("ÚLTIMA"), "aún no es la última")

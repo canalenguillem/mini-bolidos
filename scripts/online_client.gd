@@ -275,10 +275,13 @@ func start_room() -> void:
 
 
 ## Posición de un coche. slot < 0 = el propio; con slot, un bot (solo el anfitrión).
-func send_state(pos: Vector2, rot: float, vel: Vector2, slot: int = -1) -> void:
+## ts_ms: hora del emisor (ms desde que empezó su carrera); los demás clientes la usan para interpolar sin tirones.
+func send_state(pos: Vector2, rot: float, vel: Vector2, slot: int = -1, ts_ms: int = -1) -> void:
 	var msg: Dictionary = {"t": "state", "x": pos.x, "y": pos.y, "r": rot, "vx": vel.x, "vy": vel.y}
 	if slot >= 0:
 		msg["slot"] = slot
+	if ts_ms >= 0:
+		msg["ts"] = ts_ms
 	send(msg)
 
 

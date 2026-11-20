@@ -44,6 +44,7 @@ func _ready() -> void:
 	_curve = racing_line.curve
 	curve_length = _curve.get_baked_length()
 	_generate_checkpoints()
+	_add_finish_line()
 	_generate_grid()
 
 
@@ -141,6 +142,34 @@ func _generate_checkpoints() -> void:
 		root.add_child(area)
 		area.global_transform = _transform_at(offset, 0.0)
 		area.body_entered.connect(_on_checkpoint_body_entered.bind(i))
+
+
+## Dibuja la línea de meta (checkpoint 0) tan ancha como la calzada: se mide avanzando por el suelo pintado.
+func _add_finish_line() -> void:
+	var old: Node = get_node_or_null("FinishLine")
+	if old != null:
+		old.queue_free()
+	var xf: Transform2D = _transform_at(0.0, 0.0)
+	var line := FinishLine.new()
+	line.name = "FinishLine"
+	add_child(line)
+	line.global_transform = xf
+	line.left = _road_reach(xf, -1.0)
+	line.right = _road_reach(xf, 1.0)
+
+
+## Distancia (px) desde el punto central hasta donde acaba el suelo, hacia un lado (sign -1 izquierda, 1 derecha).
+func _road_reach(xf: Transform2D, sign: float) -> float:
+	var limit: float = checkpoint_width / 2.0
+	if _ground == null or _ground.tile_set == null:
+		return limit * 0.55  # pista sin tiles (el óvalo de pruebas): ancho aproximado
+	var d: float = 0.0
+	while d < limit:
+		var p: Vector2 = xf.origin + xf.y * sign * (d + 4.0)
+		if _ground.get_cell_source_id(_ground.local_to_map(_ground.to_local(p))) == -1:
+			break
+		d += 4.0
+	return d
 
 
 func _generate_grid() -> void:
