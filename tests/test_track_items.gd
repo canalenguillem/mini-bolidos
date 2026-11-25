@@ -233,7 +233,7 @@ func test_todas_las_pistas_tienen_objetos_sobre_la_calzada() -> void:
 			assert_null(track.ramp_at(item.global_position), "%s: %s no pisa una rampa" % [id, item.name])
 		assert_gte(int(kinds.get("BoostPad", 0)), 1, "%s: zona de turbo" % id)
 		assert_gte(int(kinds.get("OilSlick", 0)), 2, "%s: aceite" % id)
-		assert_gte(int(kinds.get("NitroPickup", 0)), 2, "%s: bidones" % id)
+		assert_gte(int(kinds.get("NitroPickup", 0)), 3, "%s: bidones" % id)
 		for pad: Node2D in track.get_node("Items").get_children():
 			if pad is BoostPad:
 				assert_gt((pad as BoostPad).direction().dot(track.get_direction_at(pad.global_position)), 0.9, "%s: el turbo apunta bien" % id)
@@ -247,3 +247,26 @@ func test_el_aceite_no_esta_en_la_linea_de_carrera() -> void:
 			if item is OilSlick:
 				var on_line: Vector2 = track.racing_line.to_global(track.racing_line.curve.get_closest_point(track.racing_line.to_local(item.global_position)))
 				assert_gt(item.global_position.distance_to(on_line), (item as OilSlick).radius + 20.0, "%s: %s" % [id, item.name])
+
+
+func test_un_bidon_se_coge_aunque_no_pases_justo_por_encima() -> void:
+	# El coche pasa a 35 px del centro del bidón (más de un coche de ancho): también lo recoge
+	var before: int = _car.nitro_charges
+	_car.global_position = Vector2(1790, 35)
+	_car.velocity = Vector2(300, 0)
+	_step()
+	assert_eq(_car.nitro_charges, before + 1)
+
+
+func test_al_menos_un_bidon_por_pista_esta_en_la_trazada() -> void:
+	for id: String in ["west_01", "west_02", "jungle_01", "jungle_02"]:
+		var track: Track = add_child_autofree((load("res://data/tracks/%s.tres" % id) as TrackData).scene.instantiate()) as Track
+		var on_line: int = 0
+		for item: Node2D in track.get_node("Items").get_children():
+			if item is NitroPickup:
+				var nearest: Vector2 = track.racing_line.to_global(track.racing_line.curve.get_closest_point(track.racing_line.to_local(item.global_position)))
+				var d: float = item.global_position.distance_to(nearest)
+				assert_lt(d, (item as NitroPickup).radius + 30.0, "%s: %s al alcance sin salirse de la trazada (%.0f px)" % [id, item.name, d])
+				if d < 12.0:
+					on_line += 1
+		assert_gte(on_line, 1, id)

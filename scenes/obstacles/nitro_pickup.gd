@@ -4,7 +4,7 @@ extends Node2D
 
 signal taken
 
-@export var radius: float = 22.0
+@export var radius: float = 42.0  ## zona de recogida, generosa: bastante mayor que el dibujo
 @export var respawn_time: float = 8.0
 
 var available: bool = true
@@ -36,11 +36,12 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	if not available:
-		draw_arc(Vector2.ZERO, 12.0, 0.0, TAU, 20, Color(0.3, 0.9, 1.0, 0.25), 2.0)  # hueco: aquí volverá
+		draw_arc(Vector2.ZERO, 16.0, 0.0, TAU, 24, Color(0.3, 0.9, 1.0, 0.25), 2.0)  # hueco: aquí volverá
 		return
-	var pulse: float = 1.0 + 0.12 * sin(Time.get_ticks_msec() / 180.0)
-	draw_circle(Vector2.ZERO, 17.0 * pulse, Color(0.3, 0.9, 1.0, 0.25))
-	draw_circle(Vector2.ZERO, 12.0, Color(0.1, 0.45, 0.9))
-	draw_arc(Vector2.ZERO, 12.0, 0.0, TAU, 24, Color.WHITE, 2.0)
+	var pulse: float = 1.0 + 0.15 * sin(Time.get_ticks_msec() / 180.0)
+	draw_circle(Vector2.ZERO, radius * 0.8 * pulse, Color(0.3, 0.9, 1.0, 0.16))  # halo: marca hasta dónde se coge
+	draw_circle(Vector2.ZERO, 24.0 * pulse, Color(0.3, 0.9, 1.0, 0.3))
+	draw_circle(Vector2.ZERO, 17.0, Color(0.1, 0.45, 0.9))
+	draw_arc(Vector2.ZERO, 17.0, 0.0, TAU, 28, Color.WHITE, 2.5)
 	# una "N" blanca
-	draw_polyline(PackedVector2Array([Vector2(-4, 6), Vector2(-4, -6), Vector2(4, 6), Vector2(4, -6)]), Color.WHITE, 2.5)
+	draw_polyline(PackedVector2Array([Vector2(-6, 8), Vector2(-6, -8), Vector2(6, 8), Vector2(6, -8)]), Color.WHITE, 3.0)

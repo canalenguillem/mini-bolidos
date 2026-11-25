@@ -15,7 +15,7 @@ func _initialize() -> void:
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
 		"ramps": [{"p": 0.09}],
 		"pads": [{"p": 0.56, "lateral": 0.0}],
-		"nitros": [{"p": 0.22, "lateral": 1.0}, {"p": 0.75, "lateral": -1.0}],
+		"nitros": [{"p": 0.22, "lateral": 0.6}, {"p": 0.60, "lateral": 0.0}, {"p": 0.75, "lateral": -0.6}],
 		"oils": [{"p": 0.34, "lateral": -1.2}, {"p": 0.95, "lateral": 1.2}],
 		"road_surface": "grass", "shoulder_surface": "mud",
 		"segments": [
