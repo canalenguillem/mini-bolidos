@@ -25,6 +25,13 @@ const DIFFICULTY_SKILL: Array[float] = [0.9, 1.0, 1.08]
 @export var countdown_seconds: float = 3.0
 @export var stuck_seconds: float = 3.0  ## s casi parado antes de reaparecer
 @export var stuck_speed: float = 25.0  ## px/s por debajo de los cuales cuenta como atascado
+@export_group("Presentación")
+@export var finish_slowmo: float = 0.3  ## velocidad del juego durante la cámara lenta de la meta (1 = sin cámara lenta)
+@export var finish_slowmo_time: float = 0.9  ## s reales de cámara lenta antes de los resultados (0 = resultados al instante)
+@export var wrong_way_seconds: float = 0.8  ## s yendo al revés antes de avisar
+@export var stuck_hint_seconds: float = 1.2  ## s casi parado antes de sugerir "pulsa R"
+
+const CONTROLS_HINT: String = "Flechas o WASD: conducir  ·  Espacio: nitro  ·  X: derrapar  ·  R: reaparecer"
 
 
 ## Un participante de la carrera.
@@ -53,6 +60,8 @@ var _countdown_left: float = 0.0
 var _go_text_left: float = 0.0
 var _rubber_left: float = 0.0
 var _last_count: int = 0
+var _wrong_way_time: float = 0.0
+var _slowmo: bool = false
 
 @onready var _cars_root: Node2D = $Cars
 @onready var _camera: FollowCamera = $Camera2D
@@ -76,6 +85,7 @@ func _ready() -> void:
 	_spawn_cars()
 	Music.play(track_data.music)
 	_camera.target = player.car
+	_setup_presentation()
 	_countdown_left = countdown_seconds
 	_set_locked(true)
 	_update_hud()
@@ -110,6 +120,14 @@ func _physics_process(delta: float) -> void:
 
 
 # --- Preparación ---
+
+## Cámara de entrada, minimapa y ayuda de controles. Común a la carrera local y a la online.
+func _setup_presentation() -> void:
+	_camera.intro()
+	_hud.setup_minimap(track.line_points())
+	_hud.set_hint(CONTROLS_HINT)
+
+
 
 func _spawn_cars() -> void:
 	var slots: Array[Transform2D] = track.start_transforms()
@@ -171,6 +189,7 @@ func _begin_race() -> void:
 	_set_locked(false)
 	_go_text_left = GO_TEXT_TIME
 	_hud.set_countdown("¡YA!")
+	_hud.set_hint("")
 	_sounds.go()
 	Events.race_started.emit()
 	state_changed.emit(state)
@@ -211,20 +230,42 @@ func _announce_lap(lap: int, racer: Racer) -> void:
 
 func _finish_race() -> void:
 	state = State.FINISHED
-	_set_locked(true)
+	for racer: Racer in racers:
+		racer.car.locked = true  # sin frenazo: los coches siguen rodando mientras dura la cámara lenta
 	_hud.set_countdown("")
+	_hud.set_wrong_way(false)
+	_hud.set_hint("")
 	var results: Array = _build_results()
 	Events.race_finished.emit(results)
 	_pause_menu.can_pause = false
 	_sounds.finish()
+	_camera.finish_focus = true
+	state_changed.emit(state)
 	# GameState aplica premio, récord y campeonato al oír race_finished (por eso se lee después)
-	_results.show_results(results, {
+	var info: Dictionary = {
 		"prize": GameState.last_prize,
 		"record": GameState.last_record,
 		"championship": GameState.current_championship,
 		"championship_prize": GameState.last_championship_prize,
-	})
-	state_changed.emit(state)
+	}
+	# Cámara lenta de la meta (no si el tiempo ya está alterado, como en las pruebas aceleradas)
+	if finish_slowmo_time > 0.0 and finish_slowmo < 1.0 and is_equal_approx(Engine.time_scale, 1.0):
+		_slowmo = true
+		Engine.time_scale = finish_slowmo
+		await get_tree().create_timer(finish_slowmo_time, true, false, true).timeout  # en tiempo real
+		_end_slowmo()
+	_set_locked(true)
+	_results.show_results(results, info)
+
+
+func _end_slowmo() -> void:
+	if _slowmo:
+		_slowmo = false
+		Engine.time_scale = 1.0
+
+
+func _exit_tree() -> void:
+	_end_slowmo()  # salir de la escena a mitad de la cámara lenta no debe dejar el juego lento
 
 
 func _build_results() -> Array:
@@ -301,3 +342,22 @@ func _update_hud() -> void:
 	_hud.set_position_text(_order().find(racers.find(player)) + 1, racers.size())
 	_hud.set_time(race_time)
 	_hud.set_nitro(player.car.nitro_charges, player.car.is_boosting(), player.car.nitro_fraction())
+	_hud.set_speed(player.car.velocity.length())
+	var dots: Array = []
+	for racer: Racer in racers:
+		dots.append({"pos": racer.car.global_position, "me": racer == player})
+	_hud.set_minimap_dots(dots)
+	if state == State.RACING:
+		_update_warnings(get_physics_process_delta_time())
+
+
+## Aviso de sentido contrario y sugerencia de reaparecer si el jugador lleva un rato parado.
+func _update_warnings(delta: float) -> void:
+	var car: Car = player.car
+	var speed: float = car.velocity.length()
+	var backwards: bool = speed > 60.0 and not car.airborne and player.finish_time < 0.0 \
+			and car.velocity.dot(track.get_direction_at(car.global_position)) < -0.4 * speed
+	_wrong_way_time = _wrong_way_time + delta if backwards else 0.0
+	_hud.set_wrong_way(_wrong_way_time >= wrong_way_seconds)
+	if _go_text_left <= 0.0:
+		_hud.set_hint("Pulsa R para reaparecer" if player.stuck_time >= stuck_hint_seconds and player.finish_time < 0.0 else "")

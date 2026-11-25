@@ -38,6 +38,7 @@ func _ready() -> void:
 	_spawn_cars()
 	Music.play(track_data.music)
 	_camera.target = player.car
+	_setup_presentation()
 	_countdown_left = float(_info.get("countdown_ms", 3000)) / 1000.0
 	_set_locked(true)
 	_pause_menu.pauses_game = false
@@ -197,6 +198,8 @@ func _on_net_results(msg: Dictionary) -> void:
 	state = State.FINISHED
 	_set_locked(true)
 	_hud.set_countdown("")
+	_hud.set_wrong_way(false)
+	_hud.set_hint("")
 	_pause_menu.can_pause = false
 	_sounds.finish()
 	var results: Array = []
@@ -263,6 +266,7 @@ func _on_lap_completed(lap: int, racer: Racer) -> void:
 		racer.finish_time = race_time
 		if racer.is_player:
 			racer.car.locked = true
+			_camera.finish_focus = true
 			_hud.set_countdown("¡Meta! Esperando al resto…")
 
 

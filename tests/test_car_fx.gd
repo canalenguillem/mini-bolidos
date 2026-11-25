@@ -133,11 +133,11 @@ func test_zoom_se_aleja_con_la_velocidad() -> void:
 	_car.velocity = Vector2.ZERO
 	for i: int in 120:
 		cam._process(DT)
-	assert_almost_eq(cam.zoom.x, 1.0, 0.01)
+	assert_almost_eq(cam.zoom.x, cam.base_zoom, 0.01)
 	_car.velocity = Vector2(500, 0)
 	for i: int in 300:
 		cam._process(DT)
-	assert_almost_eq(cam.zoom.x, cam.min_zoom, 0.01)
+	assert_almost_eq(cam.zoom.x, cam.min_zoom * cam.base_zoom, 0.01)
 
 
 func test_cambiar_de_objetivo_desconecta_el_anterior() -> void:

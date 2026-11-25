@@ -1,6 +1,6 @@
 # Roadmap — Mini Bólidos
 
-Hito actual: **M11** (operación; M8, M9 y M10 validados). M7 queda con solo Android pendiente: se hará después del online
+Hito actual: **M12** (sensación de juego; M11 hecho salvo la revisión del centro). M7 queda con solo Android pendiente: se hará después del online
 
 Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el humano haya validado lo que hay que probar jugando.
 
@@ -93,6 +93,13 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] Privacidad: política en la web, aceptación registrada y versionada, exportar y borrar mis datos, `docs/PRIVACIDAD.md` en el repo del servidor
 - [x] Descarga del cliente desde la web (Windows y Linux) con contador por versión
 - [ ] **Humano:** revisar `docs/PRIVACIDAD.md` con la dirección del centro, decidir la base legal (menores de 14 años), el correo de contacto (`PRIVACY_CONTACT`) y la copia de seguridad fuera del servidor
+
+## M12 — Sensación de juego (como Mini Motor Racing)
+- [x] Deslizamiento lateral real, derrape con freno de mano y miniturbo de dos niveles
+- [x] Saltos: rampas en las 4 pistas, sombra, polvo al aterrizar; los coches remotos también saltan
+- [x] Cámara más cercana y viva: entrada, nitro, saltos, aterrizajes, derrapes y cámara lenta en la meta
+- [x] HUD: minimapa, velocímetro, sentido contrario, ayuda de controles y sugerencia de reaparecer
+- [ ] **Humano:** probar la conducción nueva (desliza más que antes), el derrape, los saltos y el zoom, y ajustar
 
 ## Opcionales
 - [ ] Pista "Mesa de billar" como homenaje a Micro Machines V3

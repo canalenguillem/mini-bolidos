@@ -38,7 +38,7 @@ scenes/
   car/             # car.tscn, car.gd, controllers/ (player_controller.gd, ai_controller.gd)
   race/            # race.tscn (RaceManager), hud.tscn, results.tscn
   tracks/          # track.gd, _template.tscn, test_track.tscn, west_01.tscn, jungle_01.tscn…
-  obstacles/       # barrel.tscn, cactus.tscn, log.tscn, train.tscn
+  obstacles/       # barrel.tscn, cactus.tscn, log.tscn, train.tscn, ramp.gd (rampas de salto)
   ui/              # main_menu.tscn, garage.tscn, track_select.tscn, online_login.tscn, online_lobby.tscn
 scripts/           # clases sin escena: drive_input.gd, car_stats.gd, lap_tracker.gd…
 data/
@@ -58,7 +58,7 @@ tools/             # check.sh, load_all.gd, track_builder.gd, gen_tilesets.gd, g
 - Un script por escena, con el mismo nombre que la escena.
 - **Señales hacia arriba, llamadas hacia abajo.** Los eventos globales pasan por el autoload `Events`.
 - **Los datos no van en el código.** Coches, mejoras, pistas y superficies son Resources `.tres`. Los valores de ajuste son `@export`, para poder tocarlos desde el editor.
-- El input va siempre por acciones del InputMap (`accelerate`, `brake`, `steer_left`, `steer_right`, `nitro`, `pause`), nunca por teclas directas.
+- El input va siempre por acciones del InputMap (`accelerate`, `brake`, `steer_left`, `steer_right`, `nitro`, `drift`, `reset`, `pause`), nunca por teclas directas.
 - El coche no lee el input directamente: recibe un `DriveInput` de su controlador (humano o IA). Ver ARCHITECTURE.
 - Las capas de física están definidas en ARCHITECTURE; no inventes otras.
 - Comentarios y mensajes de commit en español; identificadores en inglés.

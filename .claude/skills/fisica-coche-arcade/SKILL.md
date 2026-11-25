@@ -119,6 +119,10 @@ func _handle_collisions(pre_speed: float) -> void:
 		crashed.emit(pre_speed)
 ```
 
+## Corrección importante sobre el código de referencia
+
+El bloque de arriba **nunca desliza**: descompone la velocidad en los ejes del coche, gira el morro y la recompone con los ejes nuevos, así que la velocidad gira al instante con el coche y `lat` es siempre 0 (el agarre y el derrape no hacen nada). En `scenes/car/car.gd` se hace bien: **primero se gira el morro y después se descompone la velocidad** en los ejes ya girados; lo que queda en `lat` es el deslizamiento, que el agarre frena (`normal_grip_mult` en conducción normal, `drift_grip_factor` derrapando). El derrape con freno de mano, el miniturbo y los saltos (`launch()`, rampas) también están ahí.
+
 ## Valores de partida (escala: 1 coche ≈ 32×16 px)
 
 | Stat | Escarabajo | Unidades |

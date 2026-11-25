@@ -80,6 +80,17 @@ func _zone_surface_id(global_pos: Vector2) -> String:
 	return ""
 
 
+## Trazado de la pista en coordenadas del mundo, un punto cada `step` px (para el minimapa).
+func line_points(step: float = 80.0) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	if _curve == null:
+		return out
+	var n: int = maxi(8, ceili(curve_length / step))
+	for i: int in n + 1:
+		out.append(racing_line.to_global(_curve.sample_baked(curve_length * i / n)))
+	return out
+
+
 # --- Rampas ---
 
 ## Rampa bajo un punto, o null.
