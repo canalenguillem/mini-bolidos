@@ -183,3 +183,15 @@ func test_solo_hay_una_linea_de_meta() -> void:
 		if c is FinishLine:
 			n += 1
 	assert_eq(n, 1)
+
+
+## Regresión: las vías y el aviso del tren tenían z_index negativo y quedaban tapados por el suelo.
+func test_las_vias_y_el_aviso_del_tren_se_dibujan_sobre_el_suelo() -> void:
+	var track: Track = _instance("west_02")
+	var ground: TileMapLayer = track.get_node("Ground") as TileMapLayer
+	for node: Node in track.get_node("Obstacles").get_children():
+		if node is Train:
+			for part: String in ["Rail", "Warning"]:
+				var item: CanvasItem = node.get_node(part) as CanvasItem
+				assert_gte(item.z_index, ground.z_index, "%s no queda por debajo del suelo" % part)
+			assert_gt((node.get_node("Body") as CanvasItem).z_index, 0, "el tren pasa por encima de los coches")
