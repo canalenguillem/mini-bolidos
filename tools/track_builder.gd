@@ -19,6 +19,7 @@ extends RefCounted
 ##   barrels:  [{p, lateral, count}]   racimos de barriles
 ##   cacti:    [{p, lateral}]          cactus (muros sueltos)
 ##   trains:   [{p, period, warning, speed, phase}]  cruces de tren
+##   ramps:    [{p, strength?}]        rampas de salto, de lado a lado de la calzada (ponlas en rectas)
 
 const UNIT: float = 64.0
 const CELL: int = 32
@@ -242,6 +243,7 @@ func _make_scene() -> Node2D:
 	var obstacles: Node2D = _make_node("Obstacles")
 	_add(root, root, obstacles)
 	_add(root, root, _make_node("SurfaceZones"))
+	_add(root, root, _make_ramps(root))
 	_add(root, root, _make_racing_line())
 	_place_obstacles(root, obstacles)
 
@@ -267,6 +269,28 @@ func _make_node(node_name: String) -> Node2D:
 func _add(root: Node, parent: Node, child: Node) -> void:
 	parent.add_child(child)
 	child.owner = root
+	if child.has_meta("_pending_owner"):
+		child.remove_meta("_pending_owner")
+		for grandchild: Node in child.get_children():
+			grandchild.owner = root
+
+
+func _make_ramps(root: Node) -> Node2D:
+	var holder: Node2D = _make_node("Ramps")
+	var n: int = 0
+	for r: Dictionary in def.get("ramps", []):
+		var at: Dictionary = _at(float(r["p"]), 0.0)
+		var ramp := Ramp.new()
+		ramp.name = "Ramp%d" % n
+		n += 1
+		holder.add_child(ramp)
+		ramp.position = at["pos"]
+		ramp.rotation = at["angle"]
+		ramp.half_width = halfs[int(at["i"])] * UNIT
+		ramp.strength = float(r.get("strength", 1.0))
+	# el dueño se asigna después de añadir el contenedor a la escena
+	holder.set_meta("_pending_owner", true)
+	return holder
 
 
 func _make_racing_line() -> Path2D:

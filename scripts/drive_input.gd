@@ -6,4 +6,5 @@ var throttle: float = 0.0  ## 0..1
 var brake: float = 0.0  ## 0..1
 var steer: float = 0.0  ## -1 (izquierda) .. 1 (derecha)
 var nitro: bool = false
+var drift: bool = false  ## freno de mano: derrapa sin perder casi velocidad
 var reset: bool = false

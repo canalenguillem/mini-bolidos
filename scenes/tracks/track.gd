@@ -32,12 +32,18 @@ var _curve: Curve2D
 var racing_line: Path2D  ## línea de carrera (la usan la IA y el progreso)
 var _cp_offsets: Array[float] = []
 var _start_transforms: Array[Transform2D] = []
+var _ramps: Array[Ramp] = []
 
 @onready var _ground: TileMapLayer = get_node_or_null("Ground") as TileMapLayer
 @onready var _zones: Node2D = get_node_or_null("SurfaceZones") as Node2D
 
 
 func _ready() -> void:
+	var ramps: Node = get_node_or_null("Ramps")
+	if ramps != null:
+		for child: Node in ramps.get_children():
+			if child is Ramp:
+				_ramps.append(child as Ramp)
 	racing_line = get_node_or_null("RacingLine") as Path2D
 	if racing_line == null or racing_line.curve == null:
 		return
@@ -72,6 +78,24 @@ func _zone_surface_id(global_pos: Vector2) -> String:
 			if Geometry2D.is_point_in_polygon(poly.to_local(global_pos), poly.polygon):
 				return str(zone.get_meta("surface", ""))
 	return ""
+
+
+# --- Rampas ---
+
+## Rampa bajo un punto, o null.
+func ramp_at(global_pos: Vector2) -> Ramp:
+	for ramp: Ramp in _ramps:
+		if ramp.contains(global_pos):
+			return ramp
+	return null
+
+
+## Sentido de la carrera (vector unitario) en el punto de la línea más cercano.
+func get_direction_at(global_pos: Vector2) -> Vector2:
+	var o: float = get_offset(global_pos)
+	var ahead: Vector2 = _curve.sample_baked(fposmod(o + 8.0, curve_length))
+	var behind: Vector2 = _curve.sample_baked(fposmod(o - 8.0, curve_length))
+	return (racing_line.global_transform.basis_xform(ahead - behind)).normalized()
 
 
 # --- Progreso sobre la línea de carrera ---

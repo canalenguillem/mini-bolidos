@@ -19,5 +19,6 @@ func get_input(delta: float) -> DriveInput:
 	_steer = move_toward(_steer, target, (steer_ramp_down if returning else steer_ramp_up) * delta)
 	input.steer = _steer * GameState.steer_sensitivity
 	input.nitro = Input.is_action_just_pressed("nitro")
+	input.drift = Input.is_action_pressed("drift")
 	input.reset = Input.is_action_just_pressed("reset")
 	return input

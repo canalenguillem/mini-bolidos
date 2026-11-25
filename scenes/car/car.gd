@@ -4,17 +4,35 @@ extends CharacterBody2D
 
 signal crashed(impact: float)
 signal reset_requested  ## el piloto pide reaparecer (tecla R)
+signal drift_boosted(level: int)  ## miniturbo al soltar un derrape cargado (nivel 1 o 2)
+signal jumped
+signal landed(air_time: float)
 
 @export var data: CarData
 @export_group("Tuning")
 @export var turn_speed_ref: float = 220.0  ## velocidad a la que el giro llega al 100 %
 @export var drift_grip_factor: float = 0.35  ## fracción del agarre durante el derrape
+@export var normal_grip_mult: float = 1.6  ## agarre en conducción normal (más = menos deslizamiento en las curvas)
 @export var wall_speed_keep: float = 0.55  ## fracción de velocidad que se conserva al chocar con una pared
 @export var car_bump_impulse: float = 140.0
 @export var barrel_push: float = 0.9  ## fracción del impacto que se transmite a los cuerpos rígidos (barriles)
 @export var barrel_drag: float = 0.15  ## velocidad que se pierde al empujar uno de frente
 @export var steer_speed_mult: float = 0.7  ## fracción del giro que se conserva a velocidad máxima (a poca velocidad, el 100 %)
 @export var nitro_accel_mult: float = 1.5  ## multiplicador de aceleración con nitro
+@export_group("Derrape")
+@export var drift_min_speed_frac: float = 0.45  ## fracción de la velocidad máxima a partir de la cual el freno de mano derrapa
+@export var drift_steer_boost: float = 1.25  ## giro extra mientras derrapa
+@export var drift_brake_frac: float = 0.12  ## fracción del freno que aplica el freno de mano (pierde poca velocidad)
+@export var drift_slide_speed: float = 40.0  ## px/s de velocidad lateral mínima para que el derrape cargue el miniturbo
+@export var drift_charge_times: Array[float] = [0.7, 1.6]  ## s derrapando para el miniturbo de nivel 1 y 2
+@export var drift_boost_times: Array[float] = [0.6, 1.1]  ## s que dura el miniturbo de cada nivel
+@export var drift_boost_mult: float = 1.14  ## velocidad máxima durante el miniturbo
+@export var drift_boost_accel: float = 1.3  ## empuje mínimo durante el miniturbo (× aceleración)
+@export_group("Salto")
+@export var jump_min_speed: float = 180.0  ## px/s mínimos sobre una rampa para despegar
+@export var jump_time_at_max: float = 0.7  ## s en el aire saliendo a velocidad máxima
+@export var jump_height_scale: float = 0.45  ## cuánto crece el coche en lo más alto del salto
+@export var air_steer_frac: float = 0.15  ## fracción del giro que queda en el aire
 
 var stats: CarStats
 var track: Track  ## lo asigna la pista o RaceManager
@@ -35,6 +53,15 @@ var _offset: float = 0.0  ## el menor de ellos: la hora del emisor que correspon
 var _fx_accum: float = 0.0
 var _name_tag: Label
 var _nitro_time_left: float = 0.0
+var drifting: bool = false
+var drift_charge: float = 0.0  ## s acumulados en el derrape en curso
+var airborne: bool:
+	get:
+		return _air_left > 0.0
+var _drift_boost_left: float = 0.0
+var _air_left: float = 0.0
+var _air_total: float = 0.0
+var _ground_mask: int = -1  ## máscara de colisión en el suelo (en el aire no choca con coches ni obstáculos)
 var _default_surface: SurfaceData = preload("res://data/surfaces/asphalt.tres")
 
 
@@ -131,6 +158,11 @@ func _ghost_render(delta: float) -> void:
 	var lat: float = velocity.dot(transform.y)
 	var surface: SurfaceData = track.get_surface_at(global_position) if track else _default_surface
 	current_surface = surface
+	_check_ramp()  # los fantasmas también saltan (cada cliente lo calcula con las rampas de su pista)
+	if airborne:
+		_air_tick(dt)
+		lat = 0.0
+		surface = _default_surface
 	if _fx != null:
 		_fx.update_state(dt, fwd, lat, 0.0, surface, false)
 	if _audio != null and stats != null:
@@ -164,6 +196,96 @@ func is_boosting() -> bool:
 	return _nitro_time_left > 0.0
 
 
+func is_drift_boosting() -> bool:
+	return _drift_boost_left > 0.0
+
+
+## Nivel de miniturbo ya cargado en el derrape en curso (0, 1 o 2).
+func drift_level() -> int:
+	var level: int = 0
+	for t: float in drift_charge_times:
+		if drift_charge >= t:
+			level += 1
+	return level
+
+
+## Altura del salto, 0 (suelo) a 1 (punto más alto).
+func jump_height() -> float:
+	return sin(PI * (1.0 - _air_left / _air_total)) if airborne and _air_total > 0.0 else 0.0
+
+
+## Despega (lo llaman las rampas). Cuanto más rápido, más tiempo en el aire. Devuelve si saltó.
+func launch(strength: float = 1.0) -> bool:
+	if airborne or stats == null:
+		return false
+	var speed: float = velocity.length()
+	if speed < jump_min_speed:
+		return false
+	_air_total = clampf(speed / stats.max_speed, 0.45, 1.3) * jump_time_at_max * strength
+	_air_left = _air_total
+	if not ghost:
+		_ground_mask = collision_mask
+		collision_mask &= ~10  # vuela por encima de coches (capa 2) y obstáculos (capa 4)
+	_end_drift(false)
+	jumped.emit()
+	return true
+
+
+func _check_ramp() -> void:
+	if airborne or track == null:
+		return
+	var ramp: Ramp = track.ramp_at(global_position)
+	if ramp != null and velocity.dot(ramp.direction()) >= jump_min_speed:
+		launch(ramp.strength)
+
+
+## Avanza el salto: escala el coche y su sombra, y aterriza al acabar.
+func _air_tick(delta: float) -> void:
+	_air_left = maxf(_air_left - delta, 0.0)
+	_show_height(jump_height())
+	if _air_left <= 0.0:
+		if _ground_mask >= 0:
+			collision_mask = _ground_mask
+			_ground_mask = -1
+		if _fx != null:
+			_fx.land_burst()
+		if _audio != null:
+			_audio.on_land()
+		landed.emit(_air_total)
+
+
+func _show_height(h: float) -> void:
+	var k: float = 1.0 + jump_height_scale * h
+	($Sprite as Node2D).scale = Vector2(0.5, 0.5) * k
+	($Body as Node2D).scale = Vector2.ONE * k
+	($Nose as Node2D).scale = Vector2.ONE * k
+	if _fx != null:
+		_fx.scale = Vector2.ONE * k
+	var shadow: Node2D = $Shadow
+	shadow.visible = h > 0.01
+	shadow.global_position = global_position + Vector2(14.0, 20.0) * h
+
+
+func _cancel_air() -> void:
+	_air_left = 0.0
+	if _ground_mask >= 0:
+		collision_mask = _ground_mask
+		_ground_mask = -1
+	_show_height(0.0)
+
+
+## Termina el derrape; si estaba cargado y `reward`, da el miniturbo.
+func _end_drift(reward: bool) -> void:
+	var level: int = drift_level()
+	drifting = false
+	drift_charge = 0.0
+	if reward and level > 0:
+		_drift_boost_left = drift_boost_times[mini(level, drift_boost_times.size()) - 1]
+		if _audio != null:
+			_audio.on_drift_boost()
+		drift_boosted.emit(level)
+
+
 ## Fracción de nitro activo restante (1 al activarlo, 0 al acabar).
 func nitro_fraction() -> float:
 	return _nitro_time_left / stats.nitro_duration if stats != null and stats.nitro_duration > 0.0 else 0.0
@@ -187,6 +309,9 @@ func teleport(xform: Transform2D) -> void:
 	global_transform = xform
 	velocity = Vector2.ZERO
 	_nitro_time_left = 0.0
+	_drift_boost_left = 0.0
+	_end_drift(false)
+	_cancel_air()
 	if _fx != null:
 		_fx.reset()
 
@@ -211,41 +336,80 @@ func _physics_process(delta: float) -> void:
 		_nitro_time_left = stats.nitro_duration
 	var boosting: bool = _nitro_time_left > 0.0
 	_nitro_time_left = maxf(_nitro_time_left - delta, 0.0)
+	var turbo: bool = _drift_boost_left > 0.0
+	_drift_boost_left = maxf(_drift_boost_left - delta, 0.0)
+
+	# --- Salto: en el aire no hay acelerador, freno ni agarre; el coche sigue su trayectoria ---
+	_check_ramp()
+	if airborne:
+		rotation += input.steer * stats.steering * air_steer_frac * delta
+		var air_velocity: Vector2 = velocity
+		move_and_slide()
+		_handle_collisions(air_velocity)
+		_air_tick(delta)
+		if _fx != null:
+			_fx.set_drift_level(0)
+			_fx.update_state(delta, fwd, 0.0, input.steer, _default_surface, boosting or turbo)
+		if _audio != null:
+			_audio.update_state(delta, fwd, 0.0, boosting, stats.max_speed)
+		return
+
+	# --- Giro (no se gira parado; la marcha atrás invierte el volante) ---
+	var speed_factor: float = clampf(absf(fwd) / turn_speed_ref, 0.0, 1.0)
+	var steer_scale: float = lerpf(1.0, steer_speed_mult, clampf(absf(fwd) / maxf(stats.max_speed, 1.0), 0.0, 1.0))
+	if drifting:
+		steer_scale *= drift_steer_boost
+	rotation += input.steer * stats.steering * steer_scale * speed_factor * signf(fwd) * delta
+	# El morro ya ha girado pero el coche sigue yendo hacia donde iba: lo que queda de lado es deslizamiento,
+	# que el agarre irá frenando. (Antes la velocidad giraba al instante con el morro y nunca deslizaba.)
+	fwd = velocity.dot(transform.x)
+	lat = velocity.dot(transform.y)
 
 	# --- Longitudinal ---
 	var speed_mult: float = lerpf(surface.speed_mult, 1.0, stats.offroad)
 	var drag_mult: float = lerpf(surface.drag_mult, 1.0, stats.offroad)
 	var grip_mult: float = lerpf(surface.grip_mult, 1.0, stats.offroad)
 	var max_speed: float = stats.max_speed * speed_mult * rubber_band \
-			* (stats.nitro_boost if boosting else 1.0)
+			* (stats.nitro_boost if boosting else 1.0) * (drift_boost_mult if turbo else 1.0)
 	var accel: float = stats.acceleration * input.throttle * (nitro_accel_mult if boosting else 1.0)
 	if boosting:
 		accel = maxf(accel, stats.acceleration * nitro_accel_mult)  # el nitro empuja sin pisar el acelerador
+	elif turbo:
+		accel = maxf(accel, stats.acceleration * drift_boost_accel)
 	if input.brake > 0.0:
 		# Si va hacia delante frena; si está casi parado, marcha atrás
 		accel -= (stats.braking if fwd > 10.0 else stats.acceleration * 0.5) * input.brake
+	elif input.drift and fwd > 10.0:
+		accel -= stats.braking * drift_brake_frac  # el freno de mano apenas frena
 	fwd += accel * delta
 	fwd -= fwd * stats.drag * drag_mult * delta
 	fwd = clampf(fwd, -stats.max_reverse, max_speed)
 
-	# --- Giro (no se gira parado; la marcha atrás invierte el volante) ---
-	var speed_factor: float = clampf(absf(fwd) / turn_speed_ref, 0.0, 1.0)
-	var steer_scale: float = lerpf(1.0, steer_speed_mult, clampf(absf(fwd) / maxf(stats.max_speed, 1.0), 0.0, 1.0))
-	rotation += input.steer * stats.steering * steer_scale * speed_factor * signf(fwd) * delta
+	# --- Derrape: freno de mano + volante (con histéresis), o frenar girando a alta velocidad ---
+	var steer_abs: float = absf(input.steer)
+	var drift_speed: float = stats.max_speed * drift_min_speed_frac
+	var was_drifting: bool = drifting
+	var hand: bool = input.drift and (
+			(drifting and fwd > drift_speed * 0.6 and steer_abs > 0.1) or (fwd > drift_speed and steer_abs > 0.3))
+	var braking_drift: bool = input.brake > 0.0 and steer_abs > 0.5 and fwd > turn_speed_ref
+	drifting = hand or braking_drift
+	if drifting:
+		if absf(lat) > drift_slide_speed:
+			drift_charge += delta
+	elif was_drifting:
+		_end_drift(true)
 
-	# --- Agarre lateral / derrape ---
-	var drifting: bool = input.brake > 0.0 and absf(input.steer) > 0.5 and fwd > turn_speed_ref
-	var grip: float = stats.grip * grip_mult * (drift_grip_factor if drifting else 1.0)
+	# --- Agarre lateral: frena el deslizamiento (mucho en conducción normal, poco derrapando) ---
+	var grip: float = stats.grip * grip_mult * (drift_grip_factor if drifting else normal_grip_mult)
 	lat = lerpf(lat, 0.0, clampf(grip * delta, 0.0, 1.0))
 
-	# Recompone con la NUEVA orientación (el morro ya ha girado)
-	var basis := Transform2D(rotation, Vector2.ZERO)
-	velocity = basis.x * fwd + basis.y * lat
+	velocity = transform.x * fwd + transform.y * lat
 	var pre_velocity: Vector2 = velocity
 	move_and_slide()
 	_handle_collisions(pre_velocity)
 	if _fx != null:
-		_fx.update_state(delta, fwd, lat, input.steer, surface, boosting)
+		_fx.set_drift_level(drift_level() if drifting else 0)
+		_fx.update_state(delta, fwd, lat, input.steer, surface, boosting or turbo)
 	if _audio != null:
 		_audio.update_state(delta, fwd, lat, boosting, max_speed)
 

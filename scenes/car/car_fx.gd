@@ -27,6 +27,12 @@ var _current: Array[Line2D] = [null, null]  ## trazo en curso de cada rueda tras
 @onready var _stripes: Array[Node2D] = [$WheelFL/Stripe, $WheelFR/Stripe, $WheelRL/Stripe, $WheelRR/Stripe]
 @onready var _dust: CPUParticles2D = $Dust
 @onready var _nitro: CPUParticles2D = $Nitro
+@onready var _sparks: CPUParticles2D = $Sparks
+@onready var _landing: CPUParticles2D = $Landing
+
+const SPARK_COLORS: Array[Color] = [Color(1, 0.9, 0.3), Color(0.35, 0.75, 1.0)]  ## miniturbo de nivel 1 y 2
+
+var drift_level: int = 0
 
 
 ## fwd/lat: velocidad longitudinal y lateral (px/s); steer: -1..1.
@@ -47,6 +53,20 @@ func update_state(delta: float, fwd: float, lat: float, steer: float, surface: S
 	_dust.emitting = dust_active
 	_dust.color = surface.particles_color
 	_nitro.emitting = boosting
+
+
+## Chispas en las ruedas traseras cuando el derrape ya ha cargado un miniturbo (amarillas: nivel 1; azules: nivel 2).
+func set_drift_level(level: int) -> void:
+	drift_level = level
+	_sparks.emitting = level > 0
+	if level > 0:
+		_sparks.color = SPARK_COLORS[mini(level, SPARK_COLORS.size()) - 1]
+
+
+## Nube de polvo al aterrizar de un salto.
+func land_burst() -> void:
+	_landing.restart()
+	_landing.emitting = true
 
 
 ## Corta los trazos en curso (al reaparecer, para no dibujar una línea que cruce el mapa).

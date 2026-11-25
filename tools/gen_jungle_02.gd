@@ -13,6 +13,7 @@ func _initialize() -> void:
 		"id": "jungle_02", "display_name": "Puente de Lianas", "theme": "jungle",
 		"music": "res://assets/audio/music/jungle.ogg", "laps": 3, "reward_mult": 1.6, "unlock_cost": 1200,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
+		"ramps": [{"p": 0.09}],
 		"road_surface": "grass", "shoulder_surface": "mud",
 		"segments": [
 			# Puente estrecho: calzada más estrecha y agua a los lados (caer = perder velocidad)

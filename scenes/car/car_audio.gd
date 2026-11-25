@@ -56,6 +56,7 @@ func update_state(delta: float, fwd: float, lat: float, boosting: bool, max_spee
 		_skid.stop()
 
 	if boosting and not _was_boosting:
+		_nitro.pitch_scale = 1.0
 		_nitro.play()
 	_was_boosting = boosting
 	_crash_cooldown_left = maxf(_crash_cooldown_left - delta, 0.0)
@@ -69,3 +70,16 @@ func on_crash(impact: float) -> void:
 	_crash.volume_db = lerpf(-16.0, -2.0, inverse_lerp(crash_min_impact, crash_max_impact, impact))
 	_crash.pitch_scale = _rng.randf_range(0.9, 1.1)
 	_crash.play()
+
+
+## Golpe sordo al aterrizar de un salto.
+func on_land() -> void:
+	_crash.volume_db = -10.0
+	_crash.pitch_scale = 0.7
+	_crash.play()
+
+
+## Soplido del miniturbo al soltar un derrape cargado.
+func on_drift_boost() -> void:
+	_nitro.pitch_scale = 1.35
+	_nitro.play()

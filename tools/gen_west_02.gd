@@ -13,6 +13,7 @@ func _initialize() -> void:
 		"id": "west_02", "display_name": "Paso del Ferrocarril", "theme": "west",
 		"music": "res://assets/audio/music/west.ogg", "laps": 3, "reward_mult": 1.2, "unlock_cost": 400,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
+		"ramps": [{"p": 0.155}],
 		"road_surface": "dirt", "shoulder_surface": "sand",
 		"segments": [
 			{"from": 0.55, "to": 0.63, "surface": "sand"},

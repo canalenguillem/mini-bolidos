@@ -13,6 +13,7 @@ func _initialize() -> void:
 		"id": "west_01", "display_name": "Cañón del Coyote", "theme": "west",
 		"music": "res://assets/audio/music/west.ogg", "laps": 3, "reward_mult": 1.0, "unlock_cost": 0,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
+		"ramps": [{"p": 0.12}],
 		"road_surface": "dirt", "shoulder_surface": "sand",
 		"segments": [
 			{"from": 0.30, "to": 0.38, "surface": "sand"},  # duna que cruza la calzada
