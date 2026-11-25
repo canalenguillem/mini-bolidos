@@ -103,6 +103,11 @@ Se definen en `data/surfaces/*.tres`. Los multiplicadores se aplican a los stats
 
 - **Derrape:** con el freno de mano y el volante girado, a partir del 45 % de la velocidad máxima, el coche se cruza y gira más perdiendo poca velocidad. Si el derrape dura 0,7 s saltan chispas amarillas y, al soltar, hay un **miniturbo** (+14 % de velocidad máxima durante 0,6 s); a los 1,6 s las chispas son azules y el miniturbo dura 1,1 s. Frenar girando a alta velocidad también derrapa.
 - **Saltos:** las rampas (franjas con galones amarillos, de lado a lado de la calzada) lanzan al coche si pasa en el sentido de la carrera a más de 180 px/s. Cuanto más rápido, más tiempo en el aire (0,7 s a velocidad máxima). En el aire no hay acelerador, freno ni agarre, casi no se puede girar y se vuela por encima de coches y obstáculos (en `west_02`, por encima del tren). Hay una rampa por pista.
+- **Objetos de la pista** (hay de los tres en cada circuito):
+  - **Bidón de nitro** (círculo azul con una N): +1 carga al pasar por encima; reaparece a los 8 s. Se pueden llevar hasta 2 cargas más que las del coche.
+  - **Zona de turbo** (rectángulo azul con flechas): empujón de 0,9 s si se pisa en el sentido de la carrera.
+  - **Mancha de aceite**: 0,8 s casi sin agarre y con menos giro. Van a un lado de la trazada, porque la IA no las esquiva.
+  - En el aire no se pisa ni se recoge nada.
 - **Cámara:** entra acercándose en la cuenta atrás, se aleja con la velocidad, el nitro, el miniturbo y los saltos, tiembla en choques y aterrizajes, se inclina un poco en los derrapes y hace cámara lenta con zoom al cruzar la meta (solo sin conexión).
 - **Ayudas en pantalla:** minimapa con todos los coches, velocímetro, aviso de sentido contrario, controles durante la cuenta atrás y sugerencia de reaparecer (R) si te quedas parado.
 

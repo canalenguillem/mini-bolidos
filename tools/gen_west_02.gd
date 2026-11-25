@@ -14,6 +14,9 @@ func _initialize() -> void:
 		"music": "res://assets/audio/music/west.ogg", "laps": 3, "reward_mult": 1.2, "unlock_cost": 400,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
 		"ramps": [{"p": 0.155}],
+		"pads": [{"p": 0.40, "lateral": -0.8}],
+		"nitros": [{"p": 0.08, "lateral": 1.0}, {"p": 0.68, "lateral": -1.0}],
+		"oils": [{"p": 0.34, "lateral": 1.2}, {"p": 0.86, "lateral": -1.2}],
 		"road_surface": "dirt", "shoulder_surface": "sand",
 		"segments": [
 			{"from": 0.55, "to": 0.63, "surface": "sand"},

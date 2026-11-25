@@ -6,6 +6,9 @@ signal crashed(impact: float)
 signal reset_requested  ## el piloto pide reaparecer (tecla R)
 signal drift_boosted(level: int)  ## miniturbo al soltar un derrape cargado (nivel 1 o 2)
 signal jumped
+signal boost_pad_hit
+signal oil_hit
+signal nitro_collected
 signal landed(air_time: float)
 
 @export var data: CarData
@@ -28,6 +31,10 @@ signal landed(air_time: float)
 @export var drift_boost_times: Array[float] = [0.6, 1.1]  ## s que dura el miniturbo de cada nivel
 @export var drift_boost_mult: float = 1.14  ## velocidad máxima durante el miniturbo
 @export var drift_boost_accel: float = 1.3  ## empuje mínimo durante el miniturbo (× aceleración)
+@export_group("Objetos de la pista")
+@export var oil_grip_factor: float = 0.1  ## fracción del agarre mientras resbala por el aceite
+@export var oil_steer_factor: float = 0.5  ## fracción del giro mientras resbala
+@export var extra_nitro_charges: int = 2  ## cargas de nitro que se pueden llevar por encima de las del coche
 @export_group("Salto")
 @export var jump_min_speed: float = 180.0  ## px/s mínimos sobre una rampa para despegar
 @export var jump_time_at_max: float = 0.7  ## s en el aire saliendo a velocidad máxima
@@ -59,6 +66,8 @@ var airborne: bool:
 	get:
 		return _air_left > 0.0
 var _drift_boost_left: float = 0.0
+var _slip_left: float = 0.0  ## s que quedan resbalando por el aceite
+var _on_pad: bool = false
 var _air_left: float = 0.0
 var _air_total: float = 0.0
 var _ground_mask: int = -1  ## máscara de colisión en el suelo (en el aire no choca con coches ni obstáculos)
@@ -209,6 +218,40 @@ func drift_level() -> int:
 	return level
 
 
+func is_slipping() -> bool:
+	return _slip_left > 0.0
+
+
+func max_nitro_charges() -> int:
+	return (stats.nitro_charges if stats != null else 1) + extra_nitro_charges
+
+
+## Zonas de turbo, aceite y bidones de nitro bajo el coche (solo en el suelo; los fantasmas no recogen nada).
+func _check_items() -> void:
+	if track == null:
+		return
+	var pad: BoostPad = track.boost_pad_at(global_position)
+	var on_pad: bool = pad != null and velocity.dot(pad.direction()) > 0.0
+	if on_pad and not _on_pad:
+		_drift_boost_left = maxf(_drift_boost_left, pad.boost_time)
+		if _audio != null:
+			_audio.on_drift_boost()
+		boost_pad_hit.emit()
+	_on_pad = on_pad
+	var oil: OilSlick = track.oil_at(global_position)
+	if oil != null:
+		if _slip_left <= 0.0:
+			oil_hit.emit()
+		_slip_left = oil.slip_time
+	if nitro_charges < max_nitro_charges():
+		var pickup: NitroPickup = track.pickup_at(global_position)
+		if pickup != null and pickup.take():
+			nitro_charges += 1
+			if _audio != null:
+				_audio.on_pickup()
+			nitro_collected.emit()
+
+
 ## Altura del salto, 0 (suelo) a 1 (punto más alto).
 func jump_height() -> float:
 	return sin(PI * (1.0 - _air_left / _air_total)) if airborne and _air_total > 0.0 else 0.0
@@ -311,6 +354,8 @@ func teleport(xform: Transform2D) -> void:
 	velocity = Vector2.ZERO
 	_nitro_time_left = 0.0
 	_drift_boost_left = 0.0
+	_slip_left = 0.0
+	_on_pad = false
 	_end_drift(false)
 	_cancel_air()
 	if _fx != null:
@@ -355,11 +400,18 @@ func _physics_process(delta: float) -> void:
 			_audio.update_state(delta, fwd, 0.0, boosting, stats.max_speed)
 		return
 
+	_check_items()
+	turbo = _drift_boost_left > 0.0  # una zona de turbo recién pisada cuenta ya en este fotograma
+	var slipping: bool = _slip_left > 0.0
+	_slip_left = maxf(_slip_left - delta, 0.0)
+
 	# --- Giro (no se gira parado; la marcha atrás invierte el volante) ---
 	var speed_factor: float = clampf(absf(fwd) / turn_speed_ref, 0.0, 1.0)
 	var steer_scale: float = lerpf(1.0, steer_speed_mult, clampf(absf(fwd) / maxf(stats.max_speed, 1.0), 0.0, 1.0))
 	if drifting:
 		steer_scale *= drift_steer_boost
+	if slipping:
+		steer_scale *= oil_steer_factor
 	rotation += input.steer * stats.steering * steer_scale * speed_factor * signf(fwd) * delta
 	# El morro ya ha girado pero el coche sigue yendo hacia donde iba: lo que queda de lado es deslizamiento,
 	# que el agarre irá frenando. (Antes la velocidad giraba al instante con el morro y nunca deslizaba.)
@@ -402,6 +454,8 @@ func _physics_process(delta: float) -> void:
 
 	# --- Agarre lateral: frena el deslizamiento (mucho en conducción normal, poco derrapando) ---
 	var grip: float = stats.grip * grip_mult * (drift_grip_factor if drifting else normal_grip_mult)
+	if slipping:
+		grip = stats.grip * oil_grip_factor  # sobre aceite da igual la superficie
 	lat = lerpf(lat, 0.0, clampf(grip * delta, 0.0, 1.0))
 
 	velocity = transform.x * fwd + transform.y * lat

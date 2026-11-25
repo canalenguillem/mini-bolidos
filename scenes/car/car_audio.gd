@@ -83,3 +83,9 @@ func on_land() -> void:
 func on_drift_boost() -> void:
 	_nitro.pitch_scale = 1.35
 	_nitro.play()
+
+
+## Tintineo agudo al recoger un bidón de nitro.
+func on_pickup() -> void:
+	_nitro.pitch_scale = 2.2
+	_nitro.play()

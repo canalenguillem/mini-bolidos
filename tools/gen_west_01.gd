@@ -14,6 +14,9 @@ func _initialize() -> void:
 		"music": "res://assets/audio/music/west.ogg", "laps": 3, "reward_mult": 1.0, "unlock_cost": 0,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
 		"ramps": [{"p": 0.12}],
+		"pads": [{"p": 0.52, "lateral": 0.8}],
+		"nitros": [{"p": 0.25, "lateral": -1.0}, {"p": 0.70, "lateral": 1.0}],
+		"oils": [{"p": 0.44, "lateral": 1.2}, {"p": 0.90, "lateral": -1.2}],
 		"road_surface": "dirt", "shoulder_surface": "sand",
 		"segments": [
 			{"from": 0.30, "to": 0.38, "surface": "sand"},  # duna que cruza la calzada

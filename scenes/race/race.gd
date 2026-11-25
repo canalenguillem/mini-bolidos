@@ -126,6 +126,9 @@ func _setup_presentation() -> void:
 	_camera.intro()
 	_hud.setup_minimap(track.line_points())
 	_hud.set_hint(CONTROLS_HINT)
+	player.car.nitro_collected.connect(func() -> void: _hud.show_banner("+1 NITRO", 1.0))
+	player.car.oil_hit.connect(func() -> void: _hud.show_banner("¡ACEITE!", 0.8))
+	player.car.boost_pad_hit.connect(func() -> void: _hud.show_banner("¡TURBO!", 0.7))
 
 
 

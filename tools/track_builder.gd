@@ -19,6 +19,9 @@ extends RefCounted
 ##   barrels:  [{p, lateral, count}]   racimos de barriles
 ##   cacti:    [{p, lateral}]          cactus (muros sueltos)
 ##   trains:   [{p, period, warning, speed, phase}]  cruces de tren
+##   pads:     [{p, lateral?}]         zonas de turbo en el suelo
+##   oils:     [{p, lateral}]          manchas de aceite (mejor fuera del centro: la IA no las esquiva)
+##   nitros:   [{p, lateral}]          bidones de nitro para recoger
 ##   ramps:    [{p, strength?}]        rampas de salto, de lado a lado de la calzada (ponlas en rectas)
 
 const UNIT: float = 64.0
@@ -244,6 +247,7 @@ func _make_scene() -> Node2D:
 	_add(root, root, obstacles)
 	_add(root, root, _make_node("SurfaceZones"))
 	_add(root, root, _make_ramps(root))
+	_add(root, root, _make_items())
 	_add(root, root, _make_racing_line())
 	_place_obstacles(root, obstacles)
 
@@ -289,6 +293,33 @@ func _make_ramps(root: Node) -> Node2D:
 		ramp.half_width = halfs[int(at["i"])] * UNIT
 		ramp.strength = float(r.get("strength", 1.0))
 	# el dueño se asigna después de añadir el contenedor a la escena
+	holder.set_meta("_pending_owner", true)
+	return holder
+
+
+func _make_items() -> Node2D:
+	var holder: Node2D = _make_node("Items")
+	var n: int = 0
+	for d: Dictionary in def.get("pads", []):
+		var at: Dictionary = _at(float(d["p"]), float(d.get("lateral", 0.0)))
+		var pad := BoostPad.new()
+		pad.name = "Pad%d" % n
+		pad.position = at["pos"]
+		pad.rotation = at["angle"]
+		holder.add_child(pad)
+		n += 1
+	for d: Dictionary in def.get("oils", []):
+		var oil := OilSlick.new()
+		oil.name = "Oil%d" % n
+		oil.position = _at(float(d["p"]), float(d.get("lateral", 0.0)))["pos"]
+		holder.add_child(oil)
+		n += 1
+	for d: Dictionary in def.get("nitros", []):
+		var pickup := NitroPickup.new()
+		pickup.name = "Nitro%d" % n
+		pickup.position = _at(float(d["p"]), float(d.get("lateral", 0.0)))["pos"]
+		holder.add_child(pickup)
+		n += 1
 	holder.set_meta("_pending_owner", true)
 	return holder
 

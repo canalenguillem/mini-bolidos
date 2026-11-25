@@ -101,6 +101,13 @@ Regla: no empezar un hito hasta que el anterior pase `./tools/check.sh` y el hum
 - [x] HUD: minimapa, velocímetro, sentido contrario, ayuda de controles y sugerencia de reaparecer
 - [ ] **Humano:** probar la conducción nueva (desliza más que antes), el derrape, los saltos y el zoom, y ajustar
 
+## M13 — Más juego (paso a paso, validando cada bloque)
+- [x] Bloque 1: bidones de nitro, zonas de turbo y manchas de aceite en las 4 pistas
+- [ ] **Humano:** probar el bloque 1 (¿cantidad y colocación de los objetos?)
+- [ ] Bloque 2: choques y coches con vida (impacto entre coches, chispas contra muros, luces de freno)
+- [ ] Bloque 3: pistas más bonitas (bordes suaves, bordillos, decoración del pack de arte)
+- [ ] Bloque 4: más pistas (ciudad) y versiones nocturnas con faros
+
 ## Opcionales
 - [ ] Pista "Mesa de billar" como homenaje a Micro Machines V3
 - [ ] Contrarreloj con fantasma

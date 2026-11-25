@@ -14,6 +14,9 @@ func _initialize() -> void:
 		"music": "res://assets/audio/music/jungle.ogg", "laps": 3, "reward_mult": 1.6, "unlock_cost": 1200,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
 		"ramps": [{"p": 0.09}],
+		"pads": [{"p": 0.56, "lateral": 0.0}],
+		"nitros": [{"p": 0.22, "lateral": 1.0}, {"p": 0.75, "lateral": -1.0}],
+		"oils": [{"p": 0.34, "lateral": -1.2}, {"p": 0.95, "lateral": 1.2}],
 		"road_surface": "grass", "shoulder_surface": "mud",
 		"segments": [
 			# Puente estrecho: calzada más estrecha y agua a los lados (caer = perder velocidad)

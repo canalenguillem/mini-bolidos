@@ -10,11 +10,13 @@ extends Camera2D
 			target.crashed.disconnect(_on_target_crashed)
 			target.landed.disconnect(_on_target_landed)
 			target.drift_boosted.disconnect(_on_target_drift_boosted)
+			target.boost_pad_hit.disconnect(_on_target_pad)
 		target = value
 		if target != null:
 			target.crashed.connect(_on_target_crashed)
 			target.landed.connect(_on_target_landed)
 			target.drift_boosted.connect(_on_target_drift_boosted)
+			target.boost_pad_hit.connect(_on_target_pad)
 @export var lookahead_time: float = 0.4  ## s de velocidad que se adelanta la cámara
 @export var max_lookahead: float = 170.0  ## px
 @export_group("Zoom")
@@ -113,4 +115,8 @@ func _on_target_landed(air_time: float) -> void:
 
 
 func _on_target_drift_boosted(_level: int) -> void:
+	add_trauma(boost_trauma)
+
+
+func _on_target_pad() -> void:
 	add_trauma(boost_trauma)

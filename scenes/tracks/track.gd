@@ -33,6 +33,9 @@ var racing_line: Path2D  ## línea de carrera (la usan la IA y el progreso)
 var _cp_offsets: Array[float] = []
 var _start_transforms: Array[Transform2D] = []
 var _ramps: Array[Ramp] = []
+var _pads: Array[BoostPad] = []
+var _oils: Array[OilSlick] = []
+var _pickups: Array[NitroPickup] = []
 
 @onready var _ground: TileMapLayer = get_node_or_null("Ground") as TileMapLayer
 @onready var _zones: Node2D = get_node_or_null("SurfaceZones") as Node2D
@@ -44,6 +47,15 @@ func _ready() -> void:
 		for child: Node in ramps.get_children():
 			if child is Ramp:
 				_ramps.append(child as Ramp)
+	var items: Node = get_node_or_null("Items")
+	if items != null:
+		for child: Node in items.get_children():
+			if child is BoostPad:
+				_pads.append(child as BoostPad)
+			elif child is OilSlick:
+				_oils.append(child as OilSlick)
+			elif child is NitroPickup:
+				_pickups.append(child as NitroPickup)
 	racing_line = get_node_or_null("RacingLine") as Path2D
 	if racing_line == null or racing_line.curve == null:
 		return
@@ -98,6 +110,30 @@ func ramp_at(global_pos: Vector2) -> Ramp:
 	for ramp: Ramp in _ramps:
 		if ramp.contains(global_pos):
 			return ramp
+	return null
+
+
+## Zona de turbo bajo un punto, o null.
+func boost_pad_at(global_pos: Vector2) -> BoostPad:
+	for pad: BoostPad in _pads:
+		if pad.contains(global_pos):
+			return pad
+	return null
+
+
+## Mancha de aceite bajo un punto, o null.
+func oil_at(global_pos: Vector2) -> OilSlick:
+	for oil: OilSlick in _oils:
+		if oil.contains(global_pos):
+			return oil
+	return null
+
+
+## Bidón de nitro disponible bajo un punto, o null.
+func pickup_at(global_pos: Vector2) -> NitroPickup:
+	for pickup: NitroPickup in _pickups:
+		if pickup.available and pickup.contains(global_pos):
+			return pickup
 	return null
 
 

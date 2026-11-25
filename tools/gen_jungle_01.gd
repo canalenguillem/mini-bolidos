@@ -15,6 +15,9 @@ func _initialize() -> void:
 		"music": "res://assets/audio/music/jungle.ogg", "laps": 3, "reward_mult": 1.4, "unlock_cost": 800,
 		"points": points, "half_width": 2.2, "shoulder": 1.1,
 		"ramps": [{"p": 0.03}],
+		"pads": [{"p": 0.33, "lateral": 0.8}],
+		"nitros": [{"p": 0.16, "lateral": -1.0}, {"p": 0.50, "lateral": 1.0}],
+		"oils": [{"p": 0.66, "lateral": 1.2}, {"p": 0.90, "lateral": -1.2}],
 		"road_surface": "grass", "shoulder_surface": "mud",
 		"segments": [
 			{"from": 0.20, "to": 0.28, "surface": "mud"},  # barrizal
