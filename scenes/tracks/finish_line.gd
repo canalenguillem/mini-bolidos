@@ -1,6 +1,7 @@
 class_name FinishLine
 extends Node2D
 ## Línea de meta a cuadros, dibujada sobre la calzada en el checkpoint 0. Solo es visual.
+## Va en la misma capa (z_index 0) que el suelo y los coches: como la pista se dibuja antes que los coches, queda debajo.
 ## El eje x local es el sentido de la carrera; el y, de lado a lado de la pista.
 
 const SQUARE: float = 12.0
@@ -8,10 +9,6 @@ const ROWS: int = 2  ## filas de cuadros a lo largo del avance
 
 var left: float = 130.0  ## px de la línea central hacia la izquierda
 var right: float = 130.0  ## y hacia la derecha
-
-
-func _ready() -> void:
-	z_index = 1  # por encima del suelo y de las marcas de derrape, por debajo de los coches
 
 
 func _draw() -> void:

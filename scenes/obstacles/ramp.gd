@@ -8,10 +8,6 @@ extends Node2D
 @export var strength: float = 1.0  ## multiplica el tiempo en el aire
 
 
-func _ready() -> void:
-	z_index = 1
-
-
 func contains(global_pos: Vector2) -> bool:
 	var p: Vector2 = to_local(global_pos)
 	return absf(p.x) <= half_length and absf(p.y) <= half_width

@@ -261,6 +261,7 @@ func _show_height(h: float) -> void:
 	($Nose as Node2D).scale = Vector2.ONE * k
 	if _fx != null:
 		_fx.scale = Vector2.ONE * k
+	z_index = 5 if h > 0.01 else 0  # en el aire, por encima de muros, obstáculos y los demás coches
 	var shadow: Node2D = $Shadow
 	shadow.visible = h > 0.01
 	shadow.global_position = global_position + Vector2(14.0, 20.0) * h

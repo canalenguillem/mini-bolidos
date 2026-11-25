@@ -288,3 +288,27 @@ func test_todas_las_pistas_tienen_rampa_sobre_la_calzada() -> void:
 			assert_eq(track.ramp_at(ramp.global_position), ramp, id)
 			var dir: Vector2 = track.get_direction_at(ramp.global_position)
 			assert_gt(ramp.direction().dot(dir), 0.95, "%s: la rampa mira en el sentido de la carrera" % id)
+
+
+## Regresión: los coches pasaban por debajo de la rampa y de la línea de meta (estaban en una capa superior).
+func test_rampas_y_meta_se_dibujan_por_debajo_de_los_coches() -> void:
+	var race: RaceManager = (load("res://scenes/race/race.tscn") as PackedScene).instantiate() as RaceManager
+	race.finish_slowmo_time = 0.0
+	add_child_autofree(race)
+	await wait_physics_frames(2)
+	var car: Car = race.player.car
+	var cars_root: Node = car.get_parent()
+	for node: Node in [race.track.get_node("Ramps").get_child(0), race.track.get_node("FinishLine")]:
+		var item: CanvasItem = node as CanvasItem
+		assert_lte(item.z_index, car.z_index, "%s no está en una capa por encima del coche" % node.name)
+		assert_true(race.track.is_ancestor_of(node))
+	assert_lt(race.track.get_index(), cars_root.get_index(), "la pista se dibuja antes que los coches")
+
+
+func test_en_el_aire_el_coche_se_dibuja_por_encima_de_todo() -> void:
+	_car.velocity = Vector2(420, 0)
+	_car.launch()
+	_car._air_tick(0.2)
+	assert_gt(_car.z_index, 0)
+	_car._air_tick(5.0)
+	assert_eq(_car.z_index, 0, "y al aterrizar vuelve a su capa")
